@@ -54,8 +54,8 @@
     <nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-purple headroom navbar-dark">
         <div class="container position-relative">
             <a class="navbar-brand me-lg-5" href="./index.html">
-                <img class="navbar-brand-dark" src="./images/wenyin-logo.png" alt="Logo light">
-                <img class="navbar-brand-light" src="./images/wenyin-logo.png" alt="Logo Dark">
+                <img class="navbar-brand-dark" src="./assets/img/wenyin-logo.png" alt="Logo light">
+                <img class="navbar-brand-light" src="./assets/img/wenyin-logo.png" alt="Logo Dark">
             </a>
             <div class="navbar-collapse collapse me-auto" id="navbar_global">
                 <div class="navbar-collapse-header">
@@ -72,7 +72,7 @@
                 </div>
                 <ul class="navbar-nav navbar-nav-hover align-items-lg-center">
                     <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" id="frontPagesDropdown" aria-expanded="false" data-bs-toggle="dropdown">
+                        <a href="#" class="btn btn d-none d-lg-inline me-md-3 btn-dribbble nav-link dropdown-toggle" id="frontPagesDropdown" aria-expanded="false" data-bs-toggle="dropdown">
                             页面导航
                             <span class="fas fa-angle-down nav-link-arrow ms-1"></span>
                         </a>
@@ -163,7 +163,7 @@
                     
                     
                     <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" id="supportDropdown" aria-expanded="false">
+                        <a href="#" class="btn d-none d-lg-inline me-md-3 btn-info nav-link dropdown-toggle" data-bs-toggle="dropdown" id="supportDropdown" aria-expanded="false">
                             技术支持
                             <span class="fas fa-angle-down nav-link-arrow ms-1"></span>
                         </a>
@@ -218,7 +218,7 @@
                         </h2>
                         <!-- Button Modal -->
                         <div class="d-flex justify-content-center align-items-center mb-5">
-                            <a href="#FAQ" class="btn btn-info mb-3 mt-2 me-2 me-md-3 animate-up-2"><span
+                            <a href="#FAQ" class="btn btn-primary-app mb-3 mt-2 me-2 me-md-3 animate-up-2"><span
                                     class="fas fa-th-large me-2"></span> <span class="d-none d-md-inline">探索项目</span></a>
                             
                         </div>
@@ -240,14 +240,14 @@
             </div>
         </div>
 
-        <section class="section section-lg">
+        <section class="section section-lg" id="FAQ">
             <div class="container">
                 <div class="row justify-content-center mb-5 mb-lg-6">
                     <div class="col-6 col-md-3 text-center mb-4">
                         <div class="icon icon-shape icon-lg bg-white shadow-lg border-light rounded-circle mb-4">
                             <span class="fas fa-puzzle-piece text-tertiary"></span>
                         </div>
-                        <h3 class="fw-bolder">操作系统</h3>
+                        <h3 class="fw-bolder">开源操作系统</h3>
                         <p class="text-gray">基于GNU/Linux开发开源操作系统</p>
                     </div>
                     <div class="col-6 col-md-3 text-center mb-4">
@@ -274,11 +274,11 @@
                 </div>
                 <div class="row justify-content-between align-items-center mb-5 mb-lg-7">
                     <div class="col-12 col-lg-5 mb-5 mb-lg-0 order-lg-2">
-                        <h2 class="h1">GNU/Linux<br>开源操作系统</h2>
-                        <p class="mb-4 lead fw-bold">Latest version of Bootstrap without jQuery</p>
-                        <p class="mb-4">Pixel is built using the latest version of Bootstrap 5 and we only used Vanilla
-                            Javascript for everything including the plugins</p>
-                        <a href="https://themesberg.com/docs/pixel-bootstrap/components/accordions/" target="_blank"
+                        <h2 class="h1 d-flex align-items-center">开源操作系统<span class="badge-md ms-3 mb-0 fs-6 badge rounded-pill text-white bg-info">OS</span></h2>
+                        <p class="mb-4 lead fw-bold">Open source OS based on GNU/Linux</p>
+                        <p class="mb-4">简约不失优美，实用美学主义，让桌面操控成为一种享受，为桌面用户提供商业操作系统之外的选择。<br><br>
+                            提高品质，保持和上游开源社区紧密合作；杜绝分裂主义，为开源社区发展做出应有贡献。</p>
+                        <a href="https://forum.wenyinos.com/thread-37.htm" target="_blank"
                             class="btn mb-2 mr-2 btn-orange"><span class="far fa-thumbs-up me-2"></span> Getting started</a>
                             
                     </div>
@@ -288,36 +288,38 @@
                 </div>
                 <div class="row justify-content-between align-items-center mb-5 mb-lg-7">
                     <div class="col-lg-5 mb-5 mb-lg-0">
-                        <h2 class="h1 d-flex align-items-center">开源项目本地化 <span
-                            class="badge-md ms-3 mb-0 fs-6 badge rounded-pill text-white bg-danger">Translation</span>
+                        <h2 class="h1 d-flex align-items-center">开源项目本地化<span class="badge-md ms-3 mb-0 fs-6 badge rounded-pill text-white bg-danger">Translation</span>
                         </h2>
-                        <p class="mb-4 lead fw-bold">More than 50 website sections</p>
-                        <p class="mb-4">Using the sections in Pixel Pro you can easily build new pages by adding them
-                            together</p>
-                        <a href="https://demo.themesberg.com/pixel-pro/v5/html/sections/all-sections.html"
+                        <p class="mb-4 lead fw-bold">Translate technical documents from abroad</p>
+                        <p class="mb-4">软件本地化，与开源方案提供的各种优势相结合，改善了用户体验，并最终导致相关方案的推广普及。<br><br>
+                            用户也相信，如果他们能用自己的语言理解这些项目，他们会更有效地使用它。
+
+                        </p>
+                        <a href="https://zh.crowdin.com/profile/wenyinos"
                             target="_blank" class="btn btn-warning mt-2 animate-up-2">
                             <span class="fas fa-book-reader me-2">  Join Translate</span>
                             
                         </a>
                     </div>
-                    <div class="col-lg-6">
-                        <img src="./assets/img/Explore.png" alt="MapBox Leaflet.js Custom Integration Mockup">
+                    <div class="col-12 col-lg-6 order-lg-1">
+                        <img src="./assets/img/btsp2.png" alt="Front pages overview">
                     </div>
                 </div>
                 <div class="row justify-content-between align-items-center">
                     <div class="col-12 col-lg-5 order-lg-2 mb-5 mb-lg-0">
                         <h2 class="h1 d-flex align-items-center">软件和知识库 <span
-                                class="badge-md ms-3 mb-0 fs-6 badge rounded-pill text-white bg-purple">Developing</span>
+                                class="badge-md ms-3 mb-0 fs-6 badge rounded-pill text-white bg-purple">Development</span>
                         </h2>
-                        <p class="mb-4 lead fw-bold">9 dashboard pages</p>
-                        <p class="mb-4">Quickly set up a user settings panel with the advanced dashboard pages including
-                            billing, settings, messaging</p>
-                        <a href="https://demo.themesberg.com/pixel-pro/v5/html/dashboard/account.html" target="_blank"
-                            class="btn btn-danger animate-up-2"><span class="fas fa-book-open me-2"></span> Explore
-                            dashboard</a>
+                        <p class="mb-4 lead fw-bold">Make our modest for open source software</p>
+                        <p class="mb-4">开源项目不仅仅是单个个体的贡献，更是一个团队共同发展的过程。
+                            在开源项目中，可以和其他开发者合作，共同开发和推广项目，从而提高整个开源社区的水平和影响力。<br> <br>
+                            编写知识库文档,可以提供开发者和其他使用者所需的指导和信息，从而使开发更加顺利和高效。
+                        </p>
+                        <a href="https://github.com/wenyinos" target="_blank"
+                            class="btn btn-danger animate-up-2"><span class="fas fa-book-open me-2"></span> Explore GitHub</a>
                     </div>
                     <div class="col-12 col-lg-6 order-lg-1">
-                        <img src="./assets/img/userdash.png" alt="Dashboard Preview">
+                        <img src="./assets/img/btsp3.png" alt="Front pages overview">
                     </div>
                 </div>
             </div>
@@ -412,11 +414,9 @@
                             
                             <p class="mt-3">Neil drives the technical strategy of the platform and brand.</p>
                             <div class="btn-group">
-                                <button class="btn btn-orange btn-icon">
+                                <a href="#" class="btn btn-dribbble btn-icon btn-link">
                                     <span class="me-1"><span class="fas fa-guitar"></span></span>
-                                    Learn More
-                                </button>
-                                
+                                    Learn More</a>
                             </div>
                         </div>
             </div>
@@ -429,14 +429,11 @@
                     </div>
                     <div class="card-body position-relative mt-n6 mx-2 bg-white border border-gray-300 text-center rounded">
                         <h3 class="h5 card-title">操作易用程度</h3>
-                        
                         <p class="mt-3">Neil drives the technical strategy of the platform and brand.</p>
                         <div class="btn-group">
-                            <button class="btn btn-success btn-icon">
+                            <a href="#" class="btn btn-success btn-icon">
                                 <span class="me-1"><span class="fas fa-gamepad"></span></span>
-                                Learn More
-                            </button>
-                            
+                                Learn More</a>
                         </div>
                     </div>
                 </div>
@@ -452,11 +449,9 @@
                         
                         <p class="mt-3">Neil drives the technical strategy of the platform and brand.</p>
                         <div class="btn-group">
-                            <button class="btn btn-info btn-icon">
-                                <span class="me-1"><span class="fas fa-blog"></span></span>
-                                Learn More
-                            </button>
-                            
+                            <a href="#" target="_blank" class="btn btn-info btn-icon">
+                                <span class="me-1"><span class="fas fa-notes-medical"></span></span>
+                                Learn More</a>
                         </div>
                     </div>
                 </div>
@@ -478,7 +473,7 @@
                                 </p>
                             </div>
                             <div class="col-12 col-md-6 mt-4 mt-md-0 text-md-right animate-left-3">
-                                <a href="#" class="btn btn-purple">
+                                <a href="http://dev.wenyinos.com/my/" class="btn btn-purple">
                                     <span class="me-1">
                                         <span class="fab fa-github"></span>
                                     </span>
@@ -552,44 +547,45 @@
         </div>
         <div class="col-12 col-lg-4">
             <div class="github-big-icon">
-                <span class="fab fa-gitlab"></span>
+                <span class="fab fa-github-alt"></span>
             </div>
         </div>
     </div>
 </section>
 
     </main>
-    <footer class="footer pt-6 pb-5 bg-gradient-secondary text-white">
+    <footer class="footer pt-6 pb-5 bg-gradient-tertiary text-white">
     <div class="container">
         <div class="row">
             <div class="col-md-4">
-                <img class="navbar-brand-dark mb-4" height="35" src="./images/new.png"
+                <img class="navbar-brand-dark mb-4" height="35" src="./assets/img/new.png"
                     alt="Logo light">
                 <p>玟茵开源社区不仅仅是一个开源技术社区，更是广大爱好者交流之地。</p>
-                <i class="fab fa-bootstrap mr-8"></i>
-                <i class="fab fa-facebook mr-8"></i>
-                <i class="fab fa-dribbble mr-8"></i>
-                <i class="fab fa-reddit mr-8"></i>
-                <i class="fab fa-twitter mr-8"></i>
+                
+                <p><a href="https://getbootstrap.com/" target="_blank">本站由Bootstrap 5强力驱动</a></p>
+                <a href="https://github.com/themesberg/pixel-bootstrap-ui-kit" target="_blank" class="btn mb-2 mr-2 btn-icon btn-pill btn-purple" type="button">
+                    <span class="btn-inner-icon"><i class="fab fa-github"></i></span>
+                     Pixel-Bootstrap-UI-Kit</a><br>
+                        <div class="info-item">
+                        <a href="https://www.qiniu.com/" target="_blank"> <img src="./assets/img/qiniu-transparent.png" height="25" width="160" border="0" /> </a>	
+                        </div>
+                    
 
             </div>
             
             <div class="col-6 col-md-4 mb-5 mb-lg-0">
                 <span class="h5">联系方式</span>
                 <ul class="footer-links mt-2">
-                    <li><div class="info-item">
-                        QQ群：376834707<br>
+                    <li><div class="info-item"><i class="fab fa-qq mr-2"></i>
+                        376834707<br>
                         <a target="_blank" href="https://shang.qq.com/wpa/qunwpa?idkey=1a4a3865e196be793e6ed6ed5ea9d7d8dc6c3b7bc2141f514292f5ca96d12adc"><img border="0" src="https://pub.idqqimg.com/wpa/images/group.png" alt="玟茵开源社区交流群" title="玟茵开源社区交流群"></a>
                     </div>
                     </li>
-                    <li><a href="mailto:ruojiner@hotmail.com">开发者邮箱：ruojiner@hotmail.com</a></li>
+                    <li><a href="mailto:ruojiner@hotmail.com">ruojiner@hotmail.com</a></li>
                     <li><a href="mailto:ruojiner@163.com">ruojiner@163.com</a></li>
-                    <li><a href="https://getbootstrap.com/" target="_blank">本站由Bootstrap 5强力驱动</a></li>
-                    <li><a href="https://github.com/themesberg/pixel-bootstrap-ui-kit" target="_blank"
-                        class="btn btn-outline-purple me-4 animate-up-2">
-                        Pixel-Bootstrap-UI-Kit
-                    </a>
-                    </li>
+                    <li><a href="https://work.weixin.qq.com/join/6uZOgyGDqkFJ1vmO3CISIw/hb_share_mng_contacts" target="_blank">WeCom（企业微信）</a></li>
+
+                    
                 </ul>
             </div>
             <div class="col-6 col-md-4 mb-5 mb-lg-0">
@@ -597,10 +593,10 @@
                 <ul class="footer-links mt-2">
                     <li><a href="https://www.zsite.com/" target="_blank">臻网建站平台</a> </li>
 					<li><a href="http://lotrc.com/" target="_blank">夕阳下的草垛</a> </li>
-					<li><a href="http://morfans.cn/" target="_blank">魔帆博客</a> </li>
+					<li><a href="https://morfans.cn/" target="_blank">魔帆博客</a> </li>
 					<li><a href="https://nthxsz.top/" target="_blank">濑·栖·屋  Microsoft NK</a> </li>
-					<li><a href="http://narukeu.cc/" target="_blank">Na Rukeu - Blog</a> </li>
-					<li><a href="http://hikaricalyx.com/" target="_blank">光卡科技（仮）</a> </li>
+					<li><a href="https://narukeu.cc/" target="_blank">Na Rukeu - Blog</a> </li>
+					<li><a href="https://hikaricalyx.com/" target="_blank">光卡科技（仮）</a> </li>
 					<li><a href="https://fuchsia-china.com/" target="_blank">Fuchsia 中文社区</a> </li>
                 </ul>
             </div>
@@ -610,7 +606,7 @@
         <div class="row">
             <div class="col mb-md-0">
                 <a href="https://wenyinos.com" target="_blank" class="d-flex justify-content-center mb-3">
-                    <img src="./images/wenyin-logo.png" height="30" class="me-2" alt="Themesberg Logo">
+                    <img src="./assets/img/wenyin-logo.png" height="30" class="me-2" alt="Themesberg Logo">
                     <p class="text-white fw-bold footer-logo-text m-0">WenYin Community</p>
                 </a>
                 <div class="d-flex text-center justify-content-center align-items-center" role="contentinfo">

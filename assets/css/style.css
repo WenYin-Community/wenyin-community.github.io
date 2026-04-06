@@ -227,12 +227,34 @@ body {
 }
 
 .section-header h1 {
-    font-size: 3.5rem;
+    font-size: 5rem;
     letter-spacing: -1px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(255, 255, 255, 0.4), 0 0 30px rgba(255, 255, 255, 0.2);
+    animation: textGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes textGlow {
+    from {
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(255, 255, 255, 0.4), 0 0 30px rgba(255, 255, 255, 0.2);
+    }
+    to {
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.6), 0 0 45px rgba(255, 255, 255, 0.4), 0 0 60px rgba(255, 255, 255, 0.2);
+    }
 }
 
 .section-header h2 {
-    font-size: 1.5rem;
+    font-size: 2.5rem;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5), 0 0 16px rgba(255, 255, 255, 0.3);
+    animation: subtitleGlow 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes subtitleGlow {
+    from {
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.5), 0 0 16px rgba(255, 255, 255, 0.3);
+    }
+    to {
+        text-shadow: 0 0 12px rgba(255, 255, 255, 0.7), 0 0 24px rgba(255, 255, 255, 0.5), 0 0 36px rgba(255, 255, 255, 0.3);
+    }
 }
 
 .wave-divider {
@@ -476,11 +498,11 @@ body {
 /* ======================== 响应式调整 ======================== */
 @media (max-width: 991.98px) {
     .section-header h1 {
-        font-size: 2.5rem;
+        font-size: 3.5rem;
     }
 
     .section-header h2 {
-        font-size: 1.25rem;
+        font-size: 1.75rem;
     }
 
     .bg-gradient-success {
@@ -511,7 +533,7 @@ body {
     }
 
     .section-header h1 {
-        font-size: 2rem;
+        font-size: 2.8rem;
     }
 
     .bg-gradient-success {

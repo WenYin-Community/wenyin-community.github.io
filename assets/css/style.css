@@ -1,0 +1,550 @@
+/* ======================== 全局样式 ======================== */
+:root {
+    --purple-primary: #6f42c1;
+    --purple-dark: #4a2c82;
+    --gradient-success: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --bg-purple: #5a3e8e;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+    overflow-x: hidden;
+}
+
+/* ======================== 导航栏样式 ======================== */
+.bg-dark-purple {
+    background-color: var(--bg-purple) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.navbar-brand-img {
+    height: 40px;
+}
+
+/* ======================== 语言切换开关 ======================== */
+.lang-switch-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.lang-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.lang-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.lang-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 24px;
+    transition: all 0.3s ease;
+}
+
+.lang-slider::before {
+    content: "";
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.lang-switch input:checked + .lang-slider {
+    background-color: #667eea;
+}
+
+.lang-switch input:checked + .lang-slider::before {
+    transform: translateX(20px);
+}
+
+.lang-label {
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.3s ease;
+    user-select: none;
+}
+
+.lang-switch input:checked ~ .lang-label:last-child,
+.lang-switch:not(:checked) ~ .lang-label:first-child {
+    color: #fff;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: color 0.2s ease;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: #fff;
+}
+
+.dropdown-compact {
+    min-width: 260px;
+    max-width: 320px;
+    padding: 0.75rem 1rem;
+    margin-top: 0.5rem;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+    background: #fff;
+}
+
+.dropdown-compact.support-menu {
+    min-width: 240px;
+    max-width: 280px;
+}
+
+.dropdown-megamenu {
+    width: 780px;
+    max-width: 95vw;
+    padding: 1rem 1.25rem;
+    margin-top: 0.5rem;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+    background: #fff;
+}
+
+.dropdown-megamenu .col-lg-4 {
+    min-width: 240px;
+    padding: 0 0.75rem;
+}
+
+.megamenu-dropdown {
+    position: static;
+}
+
+.dropdown-megamenu .dropdown-item {
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #333;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dropdown-megamenu .dropdown-item:hover {
+    background-color: #f0e6ff;
+    color: var(--purple-primary);
+    padding-left: 0.75rem;
+}
+
+.dropdown-megamenu .dropdown-item i {
+    width: 16px;
+    text-align: center;
+    color: #888;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.dropdown-megamenu .dropdown-item:hover i {
+    color: var(--purple-primary);
+}
+
+.dropdown-megamenu .dropdown-header {
+    color: var(--purple-primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.8px;
+    padding: 0.5rem 0.75rem 0.2rem;
+    margin-bottom: 0.15rem;
+}
+
+.dropdown-animate {
+    animation: dropdownPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform-origin: top center;
+}
+
+@keyframes dropdownPop {
+    0% {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.96);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.dropdown-compact .dropdown-item {
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #333;
+    transition: all 0.15s ease;
+}
+
+.dropdown-compact .dropdown-item:hover {
+    background-color: #f0e6ff;
+    color: var(--purple-primary);
+    padding-left: 1rem;
+}
+
+.dropdown-compact .dropdown-header {
+    color: var(--purple-primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.8px;
+    padding: 0.5rem 0.75rem 0.2rem;
+    margin-bottom: 0.15rem;
+}
+
+.dropdown-menu-lg {
+    min-width: 280px;
+    padding: 0.75rem 0;
+}
+
+/* ======================== Hero 区域 ======================== */
+.bg-gradient-success {
+    background: var(--gradient-success);
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+.section-header h1 {
+    font-size: 3.5rem;
+    letter-spacing: -1px;
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+}
+
+.wave-divider {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    line-height: 0;
+}
+
+.wave-divider svg {
+    display: block;
+    width: 100%;
+    height: 80px;
+}
+
+/* ======================== 截图展示区 ======================== */
+.screenshot-section {
+    margin-top: -8rem;
+    position: relative;
+    z-index: 10;
+    padding-bottom: 3rem;
+}
+
+.screenshot-img {
+    border-radius: 0.75rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* ======================== 通用 Section ======================== */
+.section {
+    padding: 5rem 0;
+}
+
+.section-lg {
+    padding: 6rem 0;
+}
+
+/* ======================== 图标盒子 ======================== */
+.icon-box {
+    transition: transform 0.3s ease;
+}
+
+.icon-box:hover {
+    transform: translateY(-5px);
+}
+
+/* ======================== Badge 样式 ======================== */
+.bg-purple {
+    background-color: var(--purple-primary) !important;
+}
+
+/* ======================== 按钮样式 ======================== */
+.btn {
+    border-radius: 50px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
+    opacity: 0;
+}
+
+.btn:active::after {
+    width: 300px;
+    height: 300px;
+    opacity: 1;
+    transition: 0s;
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+.btn-dribbble {
+    background-color: #ea4c89;
+    border-color: #ea4c89;
+    color: #fff;
+}
+
+.btn-dribbble:hover {
+    background-color: #d93a75;
+    border-color: #d93a75;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(234, 76, 137, 0.4);
+}
+
+.btn-instagram {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    border: none;
+    color: #fff;
+}
+
+.btn-instagram:hover {
+    opacity: 0.9;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 39, 67, 0.4);
+}
+
+.btn-twitter {
+    background-color: #1da1f2;
+    border-color: #1da1f2;
+    color: #fff;
+}
+
+.btn-twitter:hover {
+    background-color: #0d95e8;
+    border-color: #0d95e8;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(29, 161, 242, 0.4);
+}
+
+.btn-github {
+    background-color: #333;
+    border-color: #333;
+    color: #fff;
+}
+
+.btn-github:hover {
+    background-color: #222;
+    border-color: #222;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(51, 51, 51, 0.4);
+}
+
+.btn-orange {
+    background-color: #fd7e14;
+    border-color: #fd7e14;
+    color: #fff;
+}
+
+.btn-orange:hover {
+    background-color: #e96b0a;
+    border-color: #e96b0a;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(253, 126, 20, 0.4);
+}
+
+.btn-purple {
+    background-color: var(--purple-primary);
+    border-color: var(--purple-primary);
+    color: #fff;
+}
+
+.btn-purple:hover {
+    background-color: var(--purple-dark);
+    border-color: var(--purple-dark);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(111, 66, 193, 0.4);
+}
+
+/* ======================== 卡片样式 ======================== */
+.card {
+    border: none;
+    border-radius: 0.75rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
+}
+
+.card-img-top {
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+}
+
+/* ======================== 轮播图样式 ======================== */
+#mainCarousel .carousel-inner {
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+#mainCarousel .carousel-item img {
+    height: 400px;
+    object-fit: cover;
+}
+
+/* ======================== GitHub 图标 ======================== */
+.github-icon {
+    opacity: 0.3;
+}
+
+/* ======================== 页脚样式 ======================== */
+.footer {
+    background: linear-gradient(135deg, #2d1b4e 0%, #1a1a2e 100%);
+}
+
+.footer a {
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer a:hover {
+    color: #fff !important;
+}
+
+.footer-logo-text {
+    font-size: 1.25rem;
+}
+
+/* ======================== 手风琴样式 ======================== */
+.accordion-item {
+    border: none;
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem !important;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #f0e6ff;
+    color: var(--purple-primary);
+}
+
+.accordion-button:focus {
+    box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
+    border-color: transparent;
+}
+
+/* ======================== 响应式调整 ======================== */
+@media (max-width: 991.98px) {
+    .section-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .bg-gradient-success {
+        min-height: 60vh;
+    }
+
+    .screenshot-section {
+        margin-top: -4rem;
+    }
+
+    #mainCarousel .carousel-item img {
+        height: 250px;
+    }
+
+    .dropdown-megamenu {
+        max-width: 100%;
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .section {
+        padding: 3rem 0;
+    }
+
+    .section-lg {
+        padding: 4rem 0;
+    }
+
+    .section-header h1 {
+        font-size: 2rem;
+    }
+
+    .bg-gradient-success {
+        min-height: 50vh;
+        padding-top: 6rem;
+    }
+}
+
+/* ======================== 动画效果 ======================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeInUp {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* ======================== 辅助类 ======================== */
+.opacity-25 {
+    opacity: 0.25 !important;
+}
+
+.text-purple {
+    color: var(--purple-primary) !important;
+}
+
+.bg-purple-light {
+    background-color: #f5f0ff !important;
+}

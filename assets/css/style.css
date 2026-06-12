@@ -4,18 +4,33 @@
     --purple-dark: #4a2c82;
     --gradient-success: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --bg-purple: #5a3e8e;
+    --page-bg: #faf8fc;
+    --text-ink: #2d1b4e;
+    --text-muted-purple: #6b5b8a;
+    --font-display: 'Questrial', 'Noto Sans SC', sans-serif;
+    --font-body: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --section-gap: 8rem;
+    --card-radius: 1.25rem;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+    font-family: var(--font-body);
+    color: var(--text-ink);
+    background-color: var(--page-bg);
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* ======================== 导航栏样式 ======================== */
-.bg-dark-purple {
-    background-color: var(--bg-purple) !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s ease;
+.navbar {
+    transition: background-color 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.4s ease;
+    background-color: transparent !important;
+}
+
+.navbar.scrolled {
+    background-color: rgba(90, 62, 142, 0.95) !important;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
 }
 
 .navbar-brand-img {
@@ -96,6 +111,7 @@ body {
     color: #fff;
 }
 
+/* ======================== 下拉菜单样式 ======================== */
 .dropdown-compact {
     min-width: 260px;
     max-width: 320px;
@@ -216,73 +232,269 @@ body {
     padding: 0.75rem 0;
 }
 
-/* ======================== Hero 区域 ======================== */
-.bg-gradient-success {
-    background: var(--gradient-success);
-    min-height: 80vh;
+/* ======================== Hero 区域 (Mimo风格水墨遮罩) ======================== */
+.hero-mimo {
+    position: relative;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
-    position: relative;
+    overflow: hidden;
 }
 
-.section-header h1 {
-    font-size: 5rem;
-    letter-spacing: -1px;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(255, 255, 255, 0.4), 0 0 30px rgba(255, 255, 255, 0.2);
-    animation: textGlow 2s ease-in-out infinite alternate;
-}
-
-@keyframes textGlow {
-    from {
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(255, 255, 255, 0.4), 0 0 30px rgba(255, 255, 255, 0.2);
-    }
-    to {
-        text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.6), 0 0 45px rgba(255, 255, 255, 0.4), 0 0 60px rgba(255, 255, 255, 0.2);
-    }
-}
-
-.section-header h2 {
-    font-size: 2.5rem;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5), 0 0 16px rgba(255, 255, 255, 0.3);
-    animation: subtitleGlow 2.5s ease-in-out infinite alternate;
-}
-
-@keyframes subtitleGlow {
-    from {
-        text-shadow: 0 0 8px rgba(255, 255, 255, 0.5), 0 0 16px rgba(255, 255, 255, 0.3);
-    }
-    to {
-        text-shadow: 0 0 12px rgba(255, 255, 255, 0.7), 0 0 24px rgba(255, 255, 255, 0.5), 0 0 36px rgba(255, 255, 255, 0.3);
-    }
-}
-
-.wave-divider {
+/* 底层：画作（鼠标凿开遮罩后露出） */
+.hero__bg {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    line-height: 0;
+    inset: 0;
+    background: var(--gradient-success);
+    z-index: 0;
 }
 
-.wave-divider svg {
-    display: block;
-    width: 100%;
-    height: 80px;
+.hero__bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('../img/Screenshot_20221217.png') center/cover no-repeat;
+    opacity: 0.25;
 }
 
-/* ======================== 截图展示区 ======================== */
-.screenshot-section {
-    margin-top: -8rem;
+/* 中间层：canvas 水墨遮罩（初始填满紫色，鼠标移动处被凿开露出画作） */
+.hero__mask {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* 移动端：隐藏 canvas，直接显示背景 */
+@media (hover: none) {
+    .hero__mask { display: none; }
+}
+
+/* 顶层：文字内容 */
+.hero-content {
     position: relative;
-    z-index: 10;
-    padding-bottom: 3rem;
+    z-index: 2;
 }
 
-.screenshot-img {
-    border-radius: 0.75rem;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+.hero-title {
+    font-family: var(--font-display);
+    font-size: 4.5rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 30px rgba(0, 0, 0, 0.2);
 }
+
+.hero-tagline {
+    font-size: 1.35rem;
+    letter-spacing: 6px;
+    opacity: 0.9;
+    margin-bottom: 0.75rem;
+    font-weight: 300;
+}
+
+.hero-desc {
+    font-size: 1.1rem;
+    opacity: 0.7;
+    margin-bottom: 2.5rem;
+    font-weight: 300;
+}
+
+/* GitHub 按钮 */
+.hero-actions {
+    margin-bottom: 1rem;
+}
+
+.hero-github-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.hero-github-btn:hover {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.hero-github-btn i {
+    font-size: 1.25rem;
+}
+
+.hero-github-star {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50px;
+    font-size: 0.85rem;
+}
+
+.hero-github-star i {
+    font-size: 0.75rem;
+    color: #ffd700;
+}
+
+/* 向下滚动箭头 */
+.hero-scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.25rem;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    animation: scrollBounce 2s ease-in-out infinite;
+}
+
+.hero-scroll-hint:hover {
+    color: #fff;
+}
+
+@keyframes scrollBounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(10px); }
+}
+
+/* ======================== Feature Rows (Mimo风格交替布局) ======================== */
+.feature-row {
+    padding: var(--section-gap) 0;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.feature-row.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.feature-row.reverse .feature-image {
+    order: 2;
+}
+
+.feature-image img {
+    border-radius: var(--card-radius);
+    box-shadow: 0 20px 60px rgba(111, 66, 193, 0.15);
+}
+
+.feature-content h2 {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    color: var(--text-ink);
+    margin-bottom: 1rem;
+}
+
+.feature-content p {
+    color: var(--text-muted-purple);
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+/* ======================== 终端风格命令框 ======================== */
+.terminal-box {
+    background: #1e1033;
+    border-radius: var(--card-radius);
+    padding: 2rem;
+    color: #c4b5fd;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.9rem;
+    line-height: 2;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(30, 16, 51, 0.3);
+}
+
+.terminal-header {
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;
+}
+
+.terminal-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+.terminal-dot.red { background: #ff5f57; }
+.terminal-dot.yellow { background: #febc2e; }
+.terminal-dot.green { background: #28c840; }
+
+.terminal-prompt { color: #a78bfa; }
+.terminal-output { color: #e2d6f8; }
+
+.terminal-cursor {
+    display: inline-block;
+    animation: cursor-blink 1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+    from, to { opacity: 1 }
+    50% { opacity: 0 }
+}
+
+/* ======================== 滚动显示动画 ======================== */
+.reveal-left {
+    opacity: 0;
+    transform: translateX(-60px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal-right {
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal-up {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal-left.visible,
+.reveal-right.visible,
+.reveal-up.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.stagger-children > * {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.stagger-children.visible > * {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.stagger-children > *:nth-child(1) { transition-delay: 0.1s; }
+.stagger-children > *:nth-child(2) { transition-delay: 0.2s; }
+.stagger-children > *:nth-child(3) { transition-delay: 0.3s; }
+.stagger-children > *:nth-child(4) { transition-delay: 0.4s; }
+.stagger-children > *:nth-child(5) { transition-delay: 0.5s; }
 
 /* ======================== 通用 Section ======================== */
 .section {
@@ -428,7 +640,7 @@ body {
 /* ======================== 卡片样式 ======================== */
 .card {
     border: none;
-    border-radius: 0.75rem;
+    border-radius: var(--card-radius);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -438,19 +650,8 @@ body {
 }
 
 .card-img-top {
-    border-top-left-radius: 0.75rem;
-    border-top-right-radius: 0.75rem;
-}
-
-/* ======================== 轮播图样式 ======================== */
-#mainCarousel .carousel-inner {
-    border-radius: 0.75rem;
-    overflow: hidden;
-}
-
-#mainCarousel .carousel-item img {
-    height: 400px;
-    object-fit: cover;
+    border-top-left-radius: var(--card-radius);
+    border-top-right-radius: var(--card-radius);
 }
 
 /* ======================== GitHub 图标 ======================== */
@@ -458,22 +659,31 @@ body {
     opacity: 0.3;
 }
 
-/* ======================== 页脚样式 ======================== */
-.footer {
-    background: linear-gradient(135deg, #2d1b4e 0%, #1a1a2e 100%);
+/* ======================== 页脚样式 (Mimo风格) ======================== */
+.footer-mimo {
+    background: linear-gradient(180deg, var(--page-bg) 0%, #e8e0f0 100%);
+    color: var(--text-ink);
+    padding: 4rem 0 2rem;
 }
 
-.footer a {
+.footer-mimo a {
+    color: var(--text-muted-purple);
     text-decoration: none;
     transition: color 0.2s ease;
 }
 
-.footer a:hover {
-    color: #fff !important;
+.footer-mimo a:hover {
+    color: var(--purple-primary);
 }
 
-.footer-logo-text {
+.footer-mimo .footer-logo-text {
     font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-ink);
+}
+
+.footer-mimo hr {
+    border-color: rgba(111, 66, 193, 0.15);
 }
 
 /* ======================== 手风琴样式 ======================== */
@@ -497,24 +707,25 @@ body {
 
 /* ======================== 响应式调整 ======================== */
 @media (max-width: 991.98px) {
-    .section-header h1 {
+    .hero-title {
         font-size: 3.5rem;
     }
 
-    .section-header h2 {
-        font-size: 1.75rem;
+    .hero-tagline {
+        font-size: 1.15rem;
+        letter-spacing: 4px;
     }
 
-    .bg-gradient-success {
-        min-height: 60vh;
+    .feature-content h2 {
+        font-size: 2rem;
     }
 
-    .screenshot-section {
-        margin-top: -4rem;
+    .hero-mimo {
+        min-height: 80vh;
     }
 
-    #mainCarousel .carousel-item img {
-        height: 250px;
+    .terminal-box {
+        font-size: 0.8rem;
     }
 
     .dropdown-megamenu {
@@ -532,30 +743,57 @@ body {
         padding: 4rem 0;
     }
 
-    .section-header h1 {
-        font-size: 2.8rem;
+    .hero-title {
+        font-size: 2.5rem;
+        letter-spacing: 2px;
     }
 
-    .bg-gradient-success {
-        min-height: 50vh;
-        padding-top: 6rem;
+    .hero-tagline {
+        font-size: 1rem;
+        letter-spacing: 3px;
+    }
+
+    .feature-content h2 {
+        font-size: 1.6rem;
+    }
+
+    .hero-mimo {
+        min-height: 70vh;
+    }
+
+    .feature-row.reverse .feature-image {
+        order: 0;
+    }
+
+    .feature-row {
+        padding: 3rem 0;
     }
 }
 
-/* ======================== 动画效果 ======================== */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
+/* ======================== 无障碍：减少动画 ======================== */
+@media (prefers-reduced-motion: reduce) {
+    .reveal-up,
+    .reveal-left,
+    .reveal-right,
+    .feature-row {
         opacity: 1;
-        transform: translateY(0);
+        transform: none;
+        transition: none;
     }
-}
 
-.animate-fadeInUp {
-    animation: fadeInUp 0.6s ease-out;
+    .stagger-children > * {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+
+    .hero-scroll-hint {
+        animation: none;
+    }
+
+    .hero__mask {
+        display: none;
+    }
 }
 
 /* ======================== 辅助类 ======================== */

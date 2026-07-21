@@ -51,11 +51,38 @@ document.addEventListener('DOMContentLoaded', function() {
                 revealObserver.unobserve(entry.target);
             }
         });
-    }, { rootMargin: '0px 0px -80px 0px', threshold: 0.1 });
+    }, { rootMargin: '0px 0px -60px 0px', threshold: 0.1 });
 
     document.querySelectorAll('.reveal-up, .reveal-left, .reveal-right, .feature-row, .stagger-children').forEach(function(el) {
         revealObserver.observe(el);
     });
+
+    // ======================== Typewriter effect (Hero tagline) ========================
+    var typewriterEl = document.getElementById('typewriterText');
+    var typewriterTimer = null;
+
+    function runTypewriter(el) {
+        if (!el) return;
+        var fullText = el.getAttribute('data-' + currentLang) || el.textContent;
+        var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (prefersReduced) {
+            el.textContent = fullText;
+            return;
+        }
+
+        if (typewriterTimer) clearInterval(typewriterTimer);
+        el.textContent = '';
+        var idx = 0;
+        typewriterTimer = setInterval(function() {
+            idx++;
+            el.textContent = fullText.slice(0, idx);
+            if (idx >= fullText.length) {
+                clearInterval(typewriterTimer);
+                typewriterTimer = null;
+            }
+        }, 90);
+    }
 
     // ======================== GitHub Stars 计数 ========================
     var starsEl = document.getElementById('githubStars');
@@ -94,9 +121,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // ======================== Canvas 水墨遮罩效果 (Mimo风格) ========================
-    // 像素级 alpha buffer：管理每个像素的遮罩透明度
-    // 墨迹凿开遮罩（alpha → 0），鼠标移走后遮罩自动恢复（alpha → 1）
+    // ======================== Canvas 水墨遮罩效果 (GPU合成优化版) ========================
+    // 使用 canvas 合成操作代替逐像素计算：
+    //   destination-out + 预渲染笔刷精灵 → 凿开遮罩
+    //   source-over 低透明度填充 → 遮罩自动恢复
+    // 无任何逐像素 JS 循环，全程 GPU 加速
     var canvas = document.getElementById('inkCanvas');
     var heroSection = document.getElementById('hero');
     if (canvas && heroSection) {
@@ -104,174 +133,179 @@ document.addEventListener('DOMContentLoaded', function() {
         if (canHover) {
             var ctx = canvas.getContext('2d');
             if (ctx) {
-                var MASK_R = 90, MASK_G = 62, MASK_B = 142;
-                var R_START = 8;
-                var R_END = 128;
-                var R_VARY = 0.45;
-                var FADE_LIFETIME = 520;   // 凿开阶段 ms
-                var RESTORE_TIME = 800;    // 恢复阶段 ms
-                var STAMP_STEP = 12;
-                var MAX_STAMPS = 160;
-                var DPR = Math.min(window.devicePixelRatio || 1, 2);
+                var MASK_COLOR = 'rgb(90, 62, 142)';
+                var DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+                var BRUSH_BASE = 110;      // 笔刷基础半径 (CSS px)
+                var BRUSH_MIN = 16;        // 快速移动时最小半径
+                var STAMP_STEP = 14;       // 插值步进距离
+                var CARVE_ALPHA = 0.6;     // 单次凿开强度
+                var RESTORE_RATE = 0.028;  // 每帧恢复速率
+                var GROWTH_MS = 420;       // 墨迹生长时长
 
-                var w = 0, h = 0, cw = 0, ch = 0;
-                var alphaBuf = null;
+                var w = 0, h = 0;
+                var animating = false;
+                var lastMoveTime = 0;
+                var lastX = null, lastY = null;
+
+                // --- 预渲染不规则墨迹笔刷精灵 (只计算一次) ---
+                var BRUSH_SZ = 256;
+                var brushSprite = document.createElement('canvas');
+                brushSprite.width = BRUSH_SZ;
+                brushSprite.height = BRUSH_SZ;
+                (function() {
+                    var bctx = brushSprite.getContext('2d');
+                    var c = BRUSH_SZ / 2;
+                    var seed = Math.random() * Math.PI * 2;
+                    var N = 180;
+                    // 不规则边缘轮廓 (与原版相同的谐波公式)
+                    bctx.beginPath();
+                    for (var k = 0; k <= N; k++) {
+                        var ang = (k / N) * Math.PI * 2;
+                        var wob = 0.78 +
+                            0.14 * Math.sin(ang * 3 + seed) +
+                            0.08 * Math.sin(ang * 7 + seed * 2.1) +
+                            0.05 * Math.sin(ang * 13 + seed * 0.7);
+                        var rr = c * 0.92 * wob;
+                        var px = c + Math.cos(ang) * rr;
+                        var py = c + Math.sin(ang) * rr;
+                        if (k === 0) bctx.moveTo(px, py);
+                        else bctx.lineTo(px, py);
+                    }
+                    bctx.closePath();
+                    // 径向渐变填充 → 柔和衰减边缘
+                    var grad = bctx.createRadialGradient(c, c, 0, c, c, c * 0.92);
+                    grad.addColorStop(0, 'rgba(0,0,0,1)');
+                    grad.addColorStop(0.5, 'rgba(0,0,0,0.85)');
+                    grad.addColorStop(0.8, 'rgba(0,0,0,0.4)');
+                    grad.addColorStop(1, 'rgba(0,0,0,0)');
+                    bctx.fillStyle = grad;
+                    bctx.fill();
+                })();
+
+                // --- 活跃墨迹队列 ---
+                var brushes = [];
 
                 function resizeCanvas() {
                     var rect = heroSection.getBoundingClientRect();
                     w = rect.width;
                     h = rect.height;
-                    cw = Math.round(w * DPR);
-                    ch = Math.round(h * DPR);
-                    canvas.width = cw;
-                    canvas.height = ch;
+                    canvas.width = Math.round(w * DPR);
+                    canvas.height = Math.round(h * DPR);
                     canvas.style.width = w + 'px';
                     canvas.style.height = h + 'px';
-                    // 重新填满遮罩色
-                    alphaBuf = new Float32Array(cw * ch);
-                    for (var i = 0; i < alphaBuf.length; i++) alphaBuf[i] = 1;
+                    brushes = [];
+                    lastX = null;
+                    lastY = null;
+                    // 重填遮罩底色
                     ctx.globalCompositeOperation = 'source-over';
-                    ctx.fillStyle = 'rgb(' + MASK_R + ',' + MASK_G + ',' + MASK_B + ')';
-                    ctx.fillRect(0, 0, cw, ch);
+                    ctx.globalAlpha = 1;
+                    ctx.fillStyle = MASK_COLOR;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
                 }
                 resizeCanvas();
-                window.addEventListener('resize', resizeCanvas);
 
-                var stamps = [];
-                var lastX = null, lastY = null;
-                var running = false;
+                var resizeTimer = null;
+                window.addEventListener('resize', function() {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(resizeCanvas, 150);
+                });
 
-                function addStamp(x, y) {
-                    if (stamps.length >= MAX_STAMPS) stamps.shift();
-                    stamps.push({
+                function stampAt(x, y, radius) {
+                    brushes.push({
                         x: x, y: y,
+                        r: radius,
                         born: performance.now(),
-                        seed: Math.random() * Math.PI * 2,
-                        rmax: R_END * (1 - R_VARY + Math.random() * R_VARY)
+                        grown: false
                     });
+                    if (brushes.length > 50) brushes.splice(0, brushes.length - 50);
                 }
 
                 function stampAlong(x, y) {
+                    var now = performance.now();
+                    // 根据移动速度动态调整笔刷大小 (快→小，慢→大)
+                    var speed = 0;
+                    if (lastX !== null) {
+                        speed = Math.hypot(x - lastX, y - lastY);
+                    }
+                    var radius = Math.max(BRUSH_MIN, BRUSH_BASE - speed * 0.4);
+
                     if (lastX === null) {
-                        addStamp(x, y);
+                        stampAt(x, y, radius);
                     } else {
                         var dx = x - lastX, dy = y - lastY;
                         var dist = Math.hypot(dx, dy);
                         var steps = Math.max(1, Math.ceil(dist / STAMP_STEP));
                         for (var i = 1; i <= steps; i++) {
-                            addStamp(lastX + (dx * i) / steps, lastY + (dy * i) / steps);
+                            stampAt(lastX + (dx * i) / steps, lastY + (dy * i) / steps, radius);
                         }
                     }
                     lastX = x;
                     lastY = y;
+                    lastMoveTime = now;
+                    startLoop();
                 }
 
-                // 像素坐标
-                function stampToPixels(s, alpha, op) {
-                    var cx = Math.round(s.x * DPR);
-                    var cy = Math.round(s.y * DPR);
-                    var rad = Math.round(s.rmax * DPR * 1.2) + 2;
-                    var x0 = Math.max(0, cx - rad);
-                    var y0 = Math.max(0, cy - rad);
-                    var x1 = Math.min(cw, cx + rad);
-                    var y1 = Math.min(ch, cy + rad);
-                    var seed = s.seed;
-
-                    for (var py = y0; py < y1; py++) {
-                        var rowOff = py * cw;
-                        for (var px = x0; px < x1; px++) {
-                            var adx = px - cx, ady = py - cy;
-                            var dist = Math.sqrt(adx * adx + ady * ady);
-                            var ang = Math.atan2(ady, adx);
-                            var wob = 0.78 +
-                                0.14 * Math.sin(ang * 3 + seed) +
-                                0.08 * Math.sin(ang * 7 + seed * 2.1) +
-                                0.05 * Math.sin(ang * 13 + seed * 0.7);
-                            var rr = s.rmax * DPR * wob;
-                            if (dist >= rr) continue;
-                            var falloff = 1 - dist / rr;
-                            var strength = falloff * falloff * alpha;
-                            var idx = rowOff + px;
-                            if (op === 'carve') {
-                                alphaBuf[idx] = Math.max(0, alphaBuf[idx] - strength);
-                            } else {
-                                alphaBuf[idx] = Math.min(1, alphaBuf[idx] + strength);
-                            }
-                        }
+                // --- 动画主循环 ---
+                function startLoop() {
+                    if (!animating) {
+                        animating = true;
+                        requestAnimationFrame(frame);
                     }
                 }
 
-                function draw() {
-                    running = false;
+                function frame() {
                     var now = performance.now();
-                    var active = false;
-                    var imgData = ctx.createImageData(cw, ch);
-                    var pixels = imgData.data;
+                    var cw = canvas.width, ch = canvas.height;
 
-                    for (var i = 0; i < stamps.length; i++) {
-                        var s = stamps[i];
-                        var elapsed = now - s.born;
-                        var phaseEnd = FADE_LIFETIME + RESTORE_TIME;
+                    // 1. 恢复遮罩 (GPU 单次填充，代替逐像素 restore)
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.globalAlpha = RESTORE_RATE;
+                    ctx.fillStyle = MASK_COLOR;
+                    ctx.fillRect(0, 0, cw, ch);
 
-                        if (elapsed >= phaseEnd) {
-                            // 完全恢复，跳过
-                            stampToPixels(s, 0, 'restore');
+                    // 2. 凿开墨迹 (GPU 精灵绘制，代替逐像素 carve)
+                    ctx.globalCompositeOperation = 'destination-out';
+                    var hasActive = false;
+
+                    for (var i = brushes.length - 1; i >= 0; i--) {
+                        var b = brushes[i];
+                        var age = now - b.born;
+
+                        if (age > GROWTH_MS + 150) {
+                            brushes.splice(i, 1);
                             continue;
                         }
-                        active = true;
+                        hasActive = true;
 
-                        if (elapsed < FADE_LIFETIME) {
-                            // 阶段一：凿开遮罩
-                            var t = elapsed / FADE_LIFETIME;
-                            var ease = 1 - Math.pow(1 - t, 3);
-                            s.rmax_curr = R_START + (s.rmax - R_START) * ease;
-                            var alpha = 1 - t;
-                            var tmp = s.rmax;
-                            s.rmax = s.rmax_curr;
-                            stampToPixels(s, alpha, 'carve');
-                            s.rmax = tmp;
-                        } else {
-                            // 阶段二：遮罩恢复
-                            var restoreT = (elapsed - FADE_LIFETIME) / RESTORE_TIME;
-                            var restoreAlpha = Math.min(1, restoreT * 2);
-                            var tmp = s.rmax;
-                            s.rmax = s.rmax_curr || s.rmax;
-                            stampToPixels(s, restoreAlpha, 'restore');
-                            s.rmax = tmp;
+                        if (age < GROWTH_MS) {
+                            // 生长阶段：半径缓动扩大，强度递减
+                            var t = age / GROWTH_MS;
+                            var eased = 1 - (1 - t) * (1 - t) * (1 - t);
+                            var r = (BRUSH_MIN + (b.r - BRUSH_MIN) * eased) * DPR;
+                            ctx.globalAlpha = CARVE_ALPHA * (1 - t * 0.75);
+                            ctx.drawImage(brushSprite, b.x * DPR - r, b.y * DPR - r, r * 2, r * 2);
+                            b.grown = true;
+                        } else if (!b.grown) {
+                            b.grown = true;
                         }
                     }
 
-                    // 清理已完成的 stamp
-                    stamps = stamps.filter(function(s) {
-                        return (now - s.born) < (FADE_LIFETIME + RESTORE_TIME);
-                    });
-
-                    // 渲染 alpha buffer → canvas
-                    for (var j = 0, len = cw * ch; j < len; j++) {
-                        var a = alphaBuf[j];
-                        if (a < 1) {
-                            var off = j * 4;
-                            pixels[off] = MASK_R;
-                            pixels[off + 1] = MASK_G;
-                            pixels[off + 2] = MASK_B;
-                            pixels[off + 3] = Math.round(a * 255);
-                        }
+                    // 3. 空闲超过 1.6s 后一次性补满 (消除 8bit 量化残留)，然后停止循环
+                    if (!hasActive && now - lastMoveTime > 1600) {
+                        ctx.globalCompositeOperation = 'source-over';
+                        ctx.globalAlpha = 1;
+                        ctx.fillStyle = MASK_COLOR;
+                        ctx.fillRect(0, 0, cw, ch);
+                        animating = false;
+                        return;
                     }
-                    ctx.putImageData(imgData, 0, 0);
 
-                    if (active) {
-                        running = true;
-                        requestAnimationFrame(draw);
-                    }
+                    requestAnimationFrame(frame);
                 }
 
                 heroSection.addEventListener('mousemove', function(e) {
                     var rect = heroSection.getBoundingClientRect();
                     stampAlong(e.clientX - rect.left, e.clientY - rect.top);
-                    if (!running) {
-                        running = true;
-                        requestAnimationFrame(draw);
-                    }
                 });
 
                 heroSection.addEventListener('mouseleave', function() {
@@ -284,6 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ======================== Language Switching ========================
     var langToggle = document.getElementById('langToggle');
+    var currentLang = 'zh';
 
     function detectBrowserLanguage() {
         var lang = (navigator.language || navigator.userLanguage || 'zh-CN').toLowerCase();
@@ -292,11 +327,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function setLanguage(lang) {
+        currentLang = lang;
         document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
         localStorage.setItem('wenyin-lang', lang);
 
-        // Update all translatable elements
+        // Update all translatable elements (skip typewriter element)
         document.querySelectorAll('[data-zh][data-en]').forEach(function(el) {
+            if (el.id === 'typewriterText') return;
             var text = el.getAttribute('data-' + lang);
             if (text) {
                 if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
@@ -317,12 +354,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (langToggle) {
             langToggle.checked = lang === 'en';
         }
+
+        // Re-run typewriter with new language
+        runTypewriter(typewriterEl);
     }
 
     // Initialize language
     var savedLang = localStorage.getItem('wenyin-lang');
-    var currentLang = savedLang || detectBrowserLanguage();
-    setLanguage(currentLang);
+    var initLang = savedLang || detectBrowserLanguage();
+    setLanguage(initLang);
 
     // Toggle language on switch change
     if (langToggle) {

@@ -19,12 +19,10 @@
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="theme-color" content="#ffffff">
 
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Questrial&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS (local) -->
+    <link href="./assets/lib/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome (local) -->
+    <link href="./assets/lib/font-awesome/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="./assets/css/style.css" rel="stylesheet">
 </head>
@@ -33,152 +31,155 @@
     <!-- ======================== 顶部导航栏 ======================== -->
     <header class="header-global">
         <nav id="navbar-main" class="navbar navbar-expand-lg navbar-dark fixed-top">
-            <div class="container">
-                <div class="d-flex align-items-center">
-                    <a class="navbar-brand me-3" href="./index.html">
-                        <img class="navbar-brand-img" src="./assets/img/wenyin-logo.png" alt="Logo">
-                    </a>
-
-                    <!-- Language Toggle Switch -->
-                    <div class="lang-switch-wrapper d-none d-lg-flex align-items-center">
-                        <span class="lang-label me-2 small fw-medium">CHS</span>
-                        <label class="lang-switch" for="langToggle">
-                            <input type="checkbox" id="langToggle">
-                            <span class="lang-slider"></span>
-                        </label>
-                        <span class="lang-label ms-2 small fw-medium">EN</span>
-                    </div>
-                </div>
+            <div class="container-fluid px-4 px-lg-5">
+                <!-- 左侧：Logo -->
+                <a class="navbar-brand" href="./index.html">
+                    <img class="navbar-brand-img" src="./assets/img/wenyin-logo.png" alt="Logo">
+                </a>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar_global" aria-controls="navbar_global" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbar_global">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item dropdown megamenu-dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" id="frontPagesDropdown" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                                <span data-zh="页面导航" data-en="Navigation">页面导航</span>
+                    <!-- 中部：导航链接 (分类并排) -->
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" id="navProjects" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span data-zh="项目管理" data-en="Projects">项目管理</span>
                             </a>
-                            <div class="dropdown-menu dropdown-megamenu dropdown-animate" aria-labelledby="frontPagesDropdown">
-                                <div class="container">
-                                    <div class="row">
-                                        <div class="col-lg-4">
-                                            <h6 class="dropdown-header" data-zh="项目管理" data-en="Project Mgmt">项目管理</h6>
-                                            <a class="dropdown-item" href="http://dev.wenyinos.com/my" target="_blank">
-                                                <i class="fas fa-tasks"></i>
-                                                <span data-zh="项目管理系统（禅道）" data-en="Project Mgmt (ZenTao)">项目管理系统（禅道）</span>
-                                            </a>
-                                            <a class="dropdown-item" href="https://github.com/WenYin-Community" target="_blank">
-                                                <i class="fab fa-github"></i>
-                                                <span data-zh="GitHub 仓库" data-en="GitHub Repos">GitHub 仓库</span>
-                                            </a>
-                                            <a class="dropdown-item" href="https://gitee.com/wenyinos" target="_blank">
-                                                <i class="fab fa-code-branch"></i>
-                                                <span data-zh="Gitee 仓库" data-en="Gitee Repos">Gitee 仓库</span>
-                                            </a>
-                                            <a class="dropdown-item" href="https://zh.crowdin.com/profile/wenyinos" target="_blank">
-                                                <i class="fas fa-language"></i>
-                                                <span data-zh="Crowdin 翻译项目" data-en="Crowdin Translation">Crowdin 翻译项目</span>
-                                            </a>
-
-                                            <h6 class="dropdown-header mt-3" data-zh="软件下载" data-en="Downloads">软件下载</h6>
-                                            <a class="dropdown-item" href="https://forum.wenyinos.com/thread-33.htm" target="_blank">
-                                                <i class="fas fa-download"></i>
-                                                <span>Preview 20160502</span>
-                                            </a>
-                                            <a class="dropdown-item" href="https://forum.wenyinos.com/thread-6.htm" target="_blank">
-                                                <i class="fas fa-download"></i>
-                                                <span>Preview 20160424</span>
-                                            </a>
-                                            <a class="dropdown-item" href="https://forum.wenyinos.com/thread-34.htm" target="_blank">
-                                                <i class="fas fa-download"></i>
-                                                <span>Preview 20150903</span>
-                                            </a>
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <h6 class="dropdown-header" data-zh="进行项目" data-en="Active Projects">进行项目</h6>
-                                            <a class="dropdown-item" href="https://forum.wenyinos.com/thread-37.htm" target="_blank">
-                                                <i class="fas fa-flask"></i>
-                                                <span data-zh="参与开发测试" data-en="Join Dev & Test">参与开发测试</span> <span class="badge bg-info ms-auto">Hot</span>
-                                            </a>
-                                            <a class="dropdown-item" href="https://exmail.qq.com/login" target="_blank">
-                                                <i class="fas fa-envelope-open-text"></i>
-                                                <span data-zh="域名邮箱（Wecom）" data-en="Domain Mail (Wecom)">域名邮箱（Wecom）</span>
-                                            </a>
-                                            <a class="dropdown-item" href="https://forum.wenyinos.com/thread-36.htm" target="_blank">
-                                                <i class="fas fa-heart"></i>
-                                                <span data-zh="致谢列表" data-en="Credits List">致谢列表</span>
-                                            </a>
-                                            <a class="dropdown-item" href="https://forum.wenyinos.com/thread-35.htm" target="_blank">
-                                                <i class="fas fa-comment-dots"></i>
-                                                <span data-zh="社区留言" data-en="Guestbook">社区留言</span>
-                                            </a>
-
-                                            <h6 class="dropdown-header mt-3" data-zh="实用工具" data-en="Utilities">实用工具</h6>
-                                            <a class="dropdown-item" href="https://github.com/WenYin-Community/WenYinOS-Installer" target="_blank">
-                                                <i class="fas fa-compact-disc"></i>
-                                                <span>WenYinOS-Installer</span>
-                                            </a>
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <h6 class="dropdown-header" data-zh="社区服务" data-en="Community Services">社区服务</h6>
-                                            <a class="dropdown-item" href="https://paste.wenyinos.com/" target="_blank">
-                                                <i class="fas fa-clipboard"></i>
-                                                <span data-zh="Code PasteBin" data-en="Code Pastebin">Code PasteBin</span>
-                                            </a>
-                                            <a class="dropdown-item" href="http://bbs.wenyinos.com/" target="_blank">
-                                                <i class="fas fa-comments"></i>
-                                                <span>Legacy Computer Forum</span>
-                                            </a>
-                                            <a class="dropdown-item" href="https://cloud.wenyinos.com/" target="_blank">
-                                                <i class="fas fa-cloud"></i>
-                                                <span data-zh="网盘存储" data-en="Cloud Storage">网盘存储</span>
-                                            </a>
-                                            <a class="dropdown-item" href="https://sign.wenyinos.com/" target="_blank">
-                                                <i class="fas fa-calendar-check"></i>
-                                                <span data-zh="贴吧云签到" data-en="TieBa Cloud Check-in">贴吧云签到</span>
-                                            </a>
-                                            <a class="dropdown-item" href="https://ban.wenyinos.com/" target="_blank">
-                                                <i class="fas fa-server"></i>
-                                                <span data-zh="游戏服务器管理" data-en="Game Server Mgmt">游戏服务器管理</span>
-                                            </a>
-                                            <a class="dropdown-item" href="https://git.951959483.xyz/" target="_blank">
-                                                <i class="fas fa-bolt"></i>
-                                                <span data-zh="GitHub 文件加速" data-en="GitHub File Acceleration">GitHub 文件加速</span>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="dropdown-menu dropdown-panel dropdown-animate" aria-labelledby="navProjects">
+                                <a class="dropdown-item" href="http://dev.wenyinos.com/my" target="_blank">
+                                    <i class="fas fa-tasks"></i>
+                                    <span data-zh="项目管理系统（禅道）" data-en="Project Mgmt (ZenTao)">项目管理系统（禅道）</span>
+                                </a>
+                                <a class="dropdown-item" href="https://github.com/WenYin-Community" target="_blank">
+                                    <i class="fab fa-github"></i>
+                                    <span data-zh="GitHub 仓库" data-en="GitHub Repos">GitHub 仓库</span>
+                                </a>
+                                <a class="dropdown-item" href="https://gitee.com/wenyinos" target="_blank">
+                                    <i class="fab fa-code-branch"></i>
+                                    <span data-zh="Gitee 仓库" data-en="Gitee Repos">Gitee 仓库</span>
+                                </a>
+                                <a class="dropdown-item" href="https://zh.crowdin.com/profile/wenyinos" target="_blank">
+                                    <i class="fas fa-language"></i>
+                                    <span data-zh="Crowdin 翻译项目" data-en="Crowdin Translation">Crowdin 翻译项目</span>
+                                </a>
                             </div>
                         </li>
 
                         <li class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" id="supportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a href="#" class="nav-link dropdown-toggle" id="navServices" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span data-zh="社区服务" data-en="Services">社区服务</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-panel dropdown-animate" aria-labelledby="navServices">
+                                <a class="dropdown-item" href="https://paste.wenyinos.com/" target="_blank">
+                                    <i class="fas fa-clipboard"></i>
+                                    <span data-zh="Code PasteBin" data-en="Code Pastebin">Code PasteBin</span>
+                                </a>
+                                <a class="dropdown-item" href="http://bbs.wenyinos.com/" target="_blank">
+                                    <i class="fas fa-comments"></i>
+                                    <span>Legacy Computer Forum</span>
+                                </a>
+                                <a class="dropdown-item" href="https://cloud.wenyinos.com/" target="_blank">
+                                    <i class="fas fa-cloud"></i>
+                                    <span data-zh="网盘存储" data-en="Cloud Storage">网盘存储</span>
+                                </a>
+                                <a class="dropdown-item" href="https://sign.wenyinos.com/" target="_blank">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <span data-zh="贴吧云签到" data-en="TieBa Cloud Check-in">贴吧云签到</span>
+                                </a>
+                                <a class="dropdown-item" href="https://ban.wenyinos.com/" target="_blank">
+                                    <i class="fas fa-server"></i>
+                                    <span data-zh="游戏服务器管理" data-en="Game Server Mgmt">游戏服务器管理</span>
+                                </a>
+                                <a class="dropdown-item" href="https://git.951959483.xyz/" target="_blank">
+                                    <i class="fas fa-bolt"></i>
+                                    <span data-zh="GitHub 文件加速" data-en="GitHub File Acceleration">GitHub 文件加速</span>
+                                </a>
+                            </div>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" id="navJoin" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span data-zh="参与项目" data-en="Join Us">参与项目</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-panel dropdown-animate" aria-labelledby="navJoin">
+                                <a class="dropdown-item" href="https://forum.wenyinos.com/thread-37.htm" target="_blank">
+                                    <i class="fas fa-flask"></i>
+                                    <span data-zh="参与开发测试" data-en="Join Dev & Test">参与开发测试</span>
+                                    <span class="badge bg-info ms-auto">Hot</span>
+                                </a>
+                                <a class="dropdown-item" href="https://exmail.qq.com/login" target="_blank">
+                                    <i class="fas fa-envelope-open-text"></i>
+                                    <span data-zh="域名邮箱（Wecom）" data-en="Domain Mail (Wecom)">域名邮箱（Wecom）</span>
+                                </a>
+                                <a class="dropdown-item" href="https://forum.wenyinos.com/thread-36.htm" target="_blank">
+                                    <i class="fas fa-heart"></i>
+                                    <span data-zh="致谢列表" data-en="Credits List">致谢列表</span>
+                                </a>
+                                <a class="dropdown-item" href="https://forum.wenyinos.com/thread-35.htm" target="_blank">
+                                    <i class="fas fa-comment-dots"></i>
+                                    <span data-zh="社区留言" data-en="Guestbook">社区留言</span>
+                                </a>
+                            </div>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" id="navDownload" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span data-zh="软件下载" data-en="Downloads">软件下载</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-panel dropdown-animate" aria-labelledby="navDownload">
+                                <a class="dropdown-item" href="https://forum.wenyinos.com/thread-33.htm" target="_blank">
+                                    <i class="fas fa-download"></i>
+                                    <span>Preview 20160502</span>
+                                </a>
+                                <a class="dropdown-item" href="https://forum.wenyinos.com/thread-6.htm" target="_blank">
+                                    <i class="fas fa-download"></i>
+                                    <span>Preview 20160424</span>
+                                </a>
+                                <a class="dropdown-item" href="https://forum.wenyinos.com/thread-34.htm" target="_blank">
+                                    <i class="fas fa-download"></i>
+                                    <span>Preview 20150903</span>
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="https://github.com/WenYin-Community/WenYinOS-Installer" target="_blank">
+                                    <i class="fas fa-compact-disc"></i>
+                                    <span>WenYinOS-Installer</span>
+                                </a>
+                            </div>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" id="navSupport" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span data-zh="技术支持" data-en="Support">技术支持</span>
                             </a>
-                            <div class="dropdown-menu dropdown-compact support-menu dropdown-animate" aria-labelledby="supportDropdown">
+                            <div class="dropdown-menu dropdown-panel dropdown-animate" aria-labelledby="navSupport">
                                 <a href="mailto:admin@wenyinos.com" target="_blank" class="dropdown-item">
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-3">
-                                            <i class="fas fa-envelope"></i>
-                                        </div>
-                                        <div>
-                                            <span class="d-block fw-bold" data-zh="发送邮件" data-en="Send Email">发送邮件</span>
-                                            <small class="text-muted" data-zh="需要帮助？请联系我们！" data-en="Need help? Contact us!">需要帮助？请联系我们！</small>
-                                        </div>
-                                    </div>
+                                    <i class="fas fa-envelope"></i>
+                                    <span data-zh="发送邮件" data-en="Send Email">发送邮件</span>
+                                    <small class="dropdown-item-tip" data-zh="需要帮助？请联系我们" data-en="Need help? Contact us">需要帮助？请联系我们</small>
                                 </a>
                             </div>
                         </li>
                     </ul>
 
-                    <div class="d-flex align-items-center">
-                        <a href="http://wiki.wenyinos.com/" target="_blank" class="btn btn-outline-light me-2 d-none d-lg-inline-block">
-                            <i class="fas fa-book me-1"></i><span data-zh="知识库" data-en="Wiki">知识库</span>
+                    <!-- 右侧：语言切换 + 操作按钮 -->
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="lang-switch-wrapper d-none d-lg-flex align-items-center">
+                            <span class="lang-label me-2 small fw-medium">CHS</span>
+                            <label class="lang-switch" for="langToggle">
+                                <input type="checkbox" id="langToggle">
+                                <span class="lang-slider"></span>
+                            </label>
+                            <span class="lang-label ms-2 small fw-medium">EN</span>
+                        </div>
+                        <span class="navbar-divider d-none d-lg-block"></span>
+                        <a href="http://wiki.wenyinos.com/" target="_blank" class="btn btn-nav-ghost d-none d-lg-inline-flex">
+                            <i class="fas fa-book"></i><span data-zh="知识库" data-en="Wiki">知识库</span>
                         </a>
-                        <a href="http://forum.wenyinos.com/" target="_blank" class="btn btn-info">
-                            <i class="fas fa-brain me-1"></i><span data-zh="论坛讨论" data-en="Forum">论坛讨论</span>
+                        <a href="http://forum.wenyinos.com/" target="_blank" class="btn btn-nav-solid">
+                            <i class="fas fa-brain"></i><span data-zh="论坛讨论" data-en="Forum">论坛讨论</span>
                         </a>
                     </div>
                 </div>
@@ -188,13 +189,13 @@
 
     <!-- ======================== 页面主体内容 ======================== -->
     <main>
-        <!-- Hero 区域 (Mimo风格水墨遮罩) -->
+        <!-- Hero 区域 (水墨遮罩交互) -->
         <section class="hero-mimo" id="hero">
             <div class="hero__bg" aria-hidden="true"></div>
             <canvas class="hero__mask" id="inkCanvas" aria-hidden="true"></canvas>
             <div class="hero-content container text-center text-white">
                 <h1 class="hero-title" data-zh="玟茵开源社区" data-en="WenYin Open Source Community">玟茵开源社区</h1>
-                <p class="hero-tagline" data-zh="开放 · 包容 · 细致 · 坚守" data-en="Open · Inclusive · Meticulous · Persistent">开放 · 包容 · 细致 · 坚守</p>
+                <p class="hero-tagline"><span id="typewriterText" data-zh="开放 · 包容 · 细致 · 坚守" data-en="Open · Inclusive · Meticulous · Persistent">开放 · 包容 · 细致 · 坚守</span><span class="typewriter-cursor" aria-hidden="true"></span></p>
                 <p class="hero-desc" data-zh="基于 GNU/Linux 的开源操作系统社区" data-en="Open Source OS Community based on GNU/Linux">基于 GNU/Linux 的开源操作系统社区</p>
                 <div class="hero-actions">
                     <a class="hero-github-btn" href="https://github.com/wenyinos" target="_blank">
@@ -204,6 +205,12 @@
                             <i class="fas fa-star"></i>
                             <span id="githubStars">---</span>
                         </span>
+                        <span class="btn-arrow">→</span>
+                    </a>
+                    <a class="hero-wiki-btn" href="http://wiki.wenyinos.com/" target="_blank">
+                        <i class="fas fa-book"></i>
+                        <span data-zh="知识库" data-en="Wiki">知识库</span>
+                        <span class="btn-arrow">→</span>
                     </a>
                 </div>
             </div>
@@ -215,34 +222,38 @@
         <!-- ======================== 核心方向 ======================== -->
         <section class="section section-lg" id="features">
             <div class="container">
+                <div class="section-header reveal-up">
+                    <h2 data-zh="社区核心方向" data-en="Our Core Focus">社区核心方向</h2>
+                    <p data-zh="十余年坚守，做开源世界的践行者" data-en="Over a decade of persistence, practicing in the open source world">十余年坚守，做开源世界的践行者</p>
+                </div>
                 <div class="row text-center mb-5 stagger-children">
                     <div class="col-6 col-md-3 mb-4">
-                        <div class="icon-box mb-3">
-                            <i class="fas fa-puzzle-piece fa-3x text-primary"></i>
+                        <div class="icon-box">
+                            <i class="fas fa-puzzle-piece text-primary"></i>
                         </div>
-                        <h3 class="h5 fw-bold" data-zh="开源操作系统" data-en="Open Source OS">开源操作系统</h3>
-                        <p class="text-muted" data-zh="基于GNU/Linux开发开源操作系统" data-en="Develop open source OS based on GNU/Linux">基于GNU/Linux开发开源操作系统</p>
+                        <h3 class="feature-item-title" data-zh="开源操作系统" data-en="Open Source OS">开源操作系统</h3>
+                        <p class="feature-item-desc" data-zh="基于GNU/Linux开发开源操作系统" data-en="Develop open source OS based on GNU/Linux">基于GNU/Linux开发开源操作系统</p>
                     </div>
                     <div class="col-6 col-md-3 mb-4">
-                        <div class="icon-box mb-3">
-                            <i class="fas fa-pager fa-3x text-success"></i>
+                        <div class="icon-box">
+                            <i class="fas fa-pager text-success"></i>
                         </div>
-                        <h3 class="h5 fw-bold" data-zh="开源项目本地化" data-en="Project Localization">开源项目本地化</h3>
-                        <p class="text-muted" data-zh="翻译著名开源项目界面及文档" data-en="Translate interfaces & docs of open source projects">翻译著名开源项目界面及文档</p>
+                        <h3 class="feature-item-title" data-zh="开源项目本地化" data-en="Project Localization">开源项目本地化</h3>
+                        <p class="feature-item-desc" data-zh="翻译著名开源项目界面及文档" data-en="Translate interfaces & docs of open source projects">翻译著名开源项目界面及文档</p>
                     </div>
                     <div class="col-6 col-md-3 mb-4">
-                        <div class="icon-box mb-3">
-                            <i class="fas fa-battery-full fa-3x text-warning"></i>
+                        <div class="icon-box">
+                            <i class="fas fa-battery-full text-warning"></i>
                         </div>
-                        <h3 class="h5 fw-bold" data-zh="开源软件开发" data-en="Open Source Dev">开源软件开发</h3>
-                        <p class="text-muted" data-zh="开发社区自研软件" data-en="Develop community's own software">开发社区自研软件</p>
+                        <h3 class="feature-item-title" data-zh="开源软件开发" data-en="Open Source Dev">开源软件开发</h3>
+                        <p class="feature-item-desc" data-zh="开发社区自研软件" data-en="Develop community's own software">开发社区自研软件</p>
                     </div>
                     <div class="col-6 col-md-3 mb-4">
-                        <div class="icon-box mb-3">
-                            <i class="fas fa-bell fa-3x text-info"></i>
+                        <div class="icon-box">
+                            <i class="fas fa-bell text-info"></i>
                         </div>
-                        <h3 class="h5 fw-bold" data-zh="知识库文章撰写" data-en="Wiki Articles">知识库文章撰写</h3>
-                        <p class="text-muted" data-zh="编写开源软件操作说明等" data-en="Write guides & manuals for open source software">编写开源软件操作说明等</p>
+                        <h3 class="feature-item-title" data-zh="知识库文章撰写" data-en="Wiki Articles">知识库文章撰写</h3>
+                        <p class="feature-item-desc" data-zh="编写开源软件操作说明等" data-en="Write guides & manuals for open source software">编写开源软件操作说明等</p>
                     </div>
                 </div>
 
@@ -253,12 +264,12 @@
                             <img src="./assets/img/btsp1.png" class="img-fluid" alt="WenYinOS Desktop">
                         </div>
                         <div class="col-lg-6 feature-content">
-                            <span class="badge bg-purple mb-3">OS</span>
+                            <span class="feature-badge">OS</span>
                             <h2 data-zh="开源操作系统" data-en="Open Source OS">开源操作系统</h2>
-                            <p class="lead fw-bold" style="color: var(--text-muted-purple);">Open source OS based on GNU/Linux</p>
+                            <p class="feature-subtitle">Open source OS based on GNU/Linux</p>
                             <p data-zh="简约不失优美，实用美学主义，让桌面操控成为一种享受，为桌面用户提供商业操作系统之外的选择。<br><br>提高品质，保持和上游开源社区紧密合作；杜绝分裂主义，为开源社区发展做出应有贡献。" data-en="Simple yet elegant, pragmatic aesthetics, making desktop control a pleasure, providing desktop users with an alternative to commercial operating systems.<br><br>Improve quality, maintain close cooperation with upstream open source communities; reject separatism, and make due contributions to the development of the open source community.">简约不失优美，实用美学主义，让桌面操控成为一种享受，为桌面用户提供商业操作系统之外的选择。<br><br>提高品质，保持和上游开源社区紧密合作；杜绝分裂主义，为开源社区发展做出应有贡献。</p>
-                            <a href="https://forum.wenyinos.com/thread-37.htm" target="_blank" class="btn btn-purple">
-                                <i class="far fa-thumbs-up me-2"></i><span data-zh="开始使用" data-en="Getting started">开始使用</span>
+                            <a href="https://forum.wenyinos.com/thread-37.htm" target="_blank" class="btn btn-purple mt-2">
+                                <i class="far fa-thumbs-up"></i><span data-zh="开始使用" data-en="Getting started">开始使用</span><span class="btn-arrow">→</span>
                             </a>
                         </div>
                     </div>
@@ -271,12 +282,12 @@
                             <img src="./assets/img/btsp2.png" class="img-fluid" alt="Translation Project">
                         </div>
                         <div class="col-lg-6 feature-content">
-                            <span class="badge bg-danger mb-3" data-zh="翻译" data-en="Translation">翻译</span>
+                            <span class="feature-badge" data-zh="翻译" data-en="Translation">翻译</span>
                             <h2 data-zh="开源项目本地化" data-en="Project Localization">开源项目本地化</h2>
-                            <p class="lead fw-bold" style="color: var(--text-muted-purple);">Translate technical documents from abroad</p>
+                            <p class="feature-subtitle">Translate technical documents from abroad</p>
                             <p data-zh="软件本地化，与开源方案提供的各种优势相结合，改善了用户体验，并最终导致相关方案的推广普及。<br><br>用户也相信，如果他们能用自己的语言理解这些项目，他们会更有效地使用它。" data-en="Software localization, combined with the various advantages provided by open source solutions, improves user experience and ultimately leads to the popularization of related solutions.<br><br>Users also believe that if they can understand these projects in their own language, they will use them more effectively.">软件本地化，与开源方案提供的各种优势相结合，改善了用户体验，并最终导致相关方案的推广普及。<br><br>用户也相信，如果他们能用自己的语言理解这些项目，他们会更有效地使用它。</p>
-                            <a href="https://zh.crowdin.com/profile/wenyinos" target="_blank" class="btn btn-purple">
-                                <i class="fas fa-book-reader me-2"></i><span data-zh="参与翻译" data-en="Join Translation">参与翻译</span>
+                            <a href="https://zh.crowdin.com/profile/wenyinos" target="_blank" class="btn btn-purple mt-2">
+                                <i class="fas fa-book-reader"></i><span data-zh="参与翻译" data-en="Join Translation">参与翻译</span><span class="btn-arrow">→</span>
                             </a>
                         </div>
                     </div>
@@ -289,12 +300,12 @@
                             <img src="./assets/img/btsp3.png" class="img-fluid" alt="Software Development">
                         </div>
                         <div class="col-lg-6 feature-content">
-                            <span class="badge bg-info mb-3" data-zh="开发" data-en="Dev">开发</span>
+                            <span class="feature-badge" data-zh="开发" data-en="Dev">开发</span>
                             <h2 data-zh="软件和知识库" data-en="Software & Wiki">软件和知识库</h2>
-                            <p class="lead fw-bold" style="color: var(--text-muted-purple);">Make our modest for open source software</p>
+                            <p class="feature-subtitle">Make our modest for open source software</p>
                             <p data-zh="开源项目不仅仅是单个个体的贡献，更是一个团队共同发展的过程。在开源项目中，可以和其他开发者合作，共同开发和推广项目，从而提高整个开源社区的水平和影响力。<br><br>编写知识库文档,可以提供开发者和其他使用者所需的指导和信息，从而使开发更加顺利和高效。" data-en="Open source projects are not just about individual contributions, but also about team collaboration. In open source projects, you can work with other developers to jointly develop and promote projects, thereby improving the level and influence of the entire open source community.<br><br>Writing wiki documentation can provide developers and other users with the guidance and information they need, making development smoother and more efficient.">开源项目不仅仅是单个个体的贡献，更是一个团队共同发展的过程。在开源项目中，可以和其他开发者合作，共同开发和推广项目，从而提高整个开源社区的水平和影响力。<br><br>编写知识库文档,可以提供开发者和其他使用者所需的指导和信息，从而使开发更加顺利和高效。</p>
-                            <a href="https://github.com/wenyinos" target="_blank" class="btn btn-purple">
-                                <i class="fas fa-book-open me-2"></i><span data-zh="浏览 GitHub" data-en="Explore GitHub">浏览 GitHub</span>
+                            <a href="https://github.com/wenyinos" target="_blank" class="btn btn-purple mt-2">
+                                <i class="fas fa-book-open"></i><span data-zh="浏览 GitHub" data-en="Explore GitHub">浏览 GitHub</span><span class="btn-arrow">→</span>
                             </a>
                         </div>
                     </div>
@@ -303,7 +314,7 @@
         </section>
 
         <!-- ======================== 终端风格命令框 ======================== -->
-        <section class="section section-lg" style="background-color: #f5f0ff;">
+        <section class="section section-lg terminal-section">
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-lg-8">
@@ -329,39 +340,49 @@
         <!-- ======================== 卡片展示区 ======================== -->
         <section class="section section-lg">
             <div class="container">
+                <div class="section-header reveal-up">
+                    <h2 data-zh="设计理念" data-en="Design Philosophy">设计理念</h2>
+                    <p data-zh="以用户为中心，追求极致体验" data-en="User-centered, pursuing the ultimate experience">以用户为中心，追求极致体验</p>
+                </div>
                 <div class="row">
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card h-100 shadow reveal-up">
-                            <img src="./assets/img/card1.png" class="card-img-top" alt="用户界面设计">
+                        <div class="showcase-card card-tint-1 reveal-up">
+                            <div class="card-img-wrapper">
+                                <img src="./assets/img/card1.png" class="card-img-top" alt="用户界面设计">
+                            </div>
                             <div class="card-body text-center">
-                                <h3 class="h5 card-title" data-zh="用户界面设计" data-en="UI Design">用户界面设计</h3>
+                                <h3 class="card-title" data-zh="用户界面设计" data-en="UI Design">用户界面设计</h3>
                                 <p class="card-text" data-zh="界面应该直观、简洁，易于理解和使用。应使用适当界面元素来吸引用户，同时确保信息结构清晰，易于理解。" data-en="Interfaces should be intuitive, clean, and easy to understand and use. Appropriate UI elements should be used to attract users while ensuring information structure is clear and comprehensible.">界面应该直观、简洁，易于理解和使用。应使用适当界面元素来吸引用户，同时确保信息结构清晰，易于理解。</p>
-                                <a href="#" class="btn btn-twitter btn-sm">
-                                    <i class="fas fa-guitar me-1"></i><span data-zh="了解更多" data-en="Learn More">了解更多</span>
+                                <a href="#" class="btn btn-outline-purple btn-sm">
+                                    <i class="fas fa-guitar"></i><span data-zh="了解更多" data-en="Learn More">了解更多</span><span class="btn-arrow">→</span>
                                 </a>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card h-100 shadow reveal-up">
-                            <img src="./assets/img/card2.png" class="card-img-top" alt="操作易用程度">
+                        <div class="showcase-card card-tint-2 reveal-up">
+                            <div class="card-img-wrapper">
+                                <img src="./assets/img/card2.png" class="card-img-top" alt="操作易用程度">
+                            </div>
                             <div class="card-body text-center">
-                                <h3 class="h5 card-title" data-zh="操作易用程度" data-en="Usability">操作易用程度</h3>
+                                <h3 class="card-title" data-zh="操作易用程度" data-en="Usability">操作易用程度</h3>
                                 <p class="card-text" data-zh="软件的界面设计和易用性应该适应不同的用户需求和使用场景。以便用户可以根据自己的需求和偏好来使用软件。" data-en="Software interface design and usability should adapt to different user needs and usage scenarios, so users can use the software according to their own needs and preferences.">软件的界面设计和易用性应该适应不同的用户需求和使用场景。以便用户可以根据自己的需求和偏好来使用软件。</p>
-                                <a href="#" class="btn btn-instagram btn-sm">
-                                    <i class="fas fa-gamepad me-1"></i><span data-zh="了解更多" data-en="Learn More">了解更多</span>
+                                <a href="#" class="btn btn-outline-purple btn-sm">
+                                    <i class="fas fa-gamepad"></i><span data-zh="了解更多" data-en="Learn More">了解更多</span><span class="btn-arrow">→</span>
                                 </a>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card h-100 shadow reveal-up">
-                            <img src="./assets/img/card3.png" class="card-img-top" alt="社区活跃参与">
+                        <div class="showcase-card card-tint-3 reveal-up">
+                            <div class="card-img-wrapper">
+                                <img src="./assets/img/card3.png" class="card-img-top" alt="社区活跃参与">
+                            </div>
                             <div class="card-body text-center">
-                                <h3 class="h5 card-title" data-zh="社区活跃参与" data-en="Community Engagement">社区活跃参与</h3>
+                                <h3 class="card-title" data-zh="社区活跃参与" data-en="Community Engagement">社区活跃参与</h3>
                                 <p class="card-text" data-zh="通过参与开源项目，可以和来自不同背景领域的开发者一起合作，获得丰富的开发经验，从而提高自己的技能水平。" data-en="By participating in open source projects, you can collaborate with developers from different backgrounds, gain rich development experience, and improve your skills.">通过参与开源项目，可以和来自不同背景领域的开发者一起合作，获得丰富的开发经验，从而提高自己的技能水平。</p>
-                                <a href="#" target="_blank" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-notes-medical me-1"></i><span data-zh="了解更多" data-en="Learn More">了解更多</span>
+                                <a href="#" class="btn btn-outline-purple btn-sm">
+                                    <i class="fas fa-notes-medical"></i><span data-zh="了解更多" data-en="Learn More">了解更多</span><span class="btn-arrow">→</span>
                                 </a>
                             </div>
                         </div>
@@ -371,18 +392,16 @@
                 <!-- 参与项目号召 -->
                 <div class="row mt-4">
                     <div class="col-12">
-                        <div class="card shadow reveal-up">
-                            <div class="card-body p-5 text-center text-md-start">
-                                <div class="row align-items-center">
-                                    <div class="col-md-8">
-                                        <h2 class="mb-3" data-zh="参与项目" data-en="Join the Project">参与项目</h2>
-                                        <p class="mb-0" data-zh="如果您有自己的想法或者金点子，请提交给我们或直接参与项目，在此欢迎各位，您的反馈是我们持续前进的动力。" data-en="If you have your own ideas or great thoughts, please submit them to us or join the project directly. Everyone is welcome here, and your feedback is the driving force for our continuous progress.">如果您有自己的想法或者金点子，请提交给我们或直接参与项目，在此欢迎各位，您的反馈是我们持续前进的动力。</p>
-                                    </div>
-                                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                                        <a href="http://dev.wenyinos.com/my/" class="btn btn-dark btn-lg">
-                                            <i class="fab fa-gitlab me-1"></i><span data-zh="项目管理" data-en="Project Mgmt">项目管理</span>
-                                        </a>
-                                    </div>
+                        <div class="cta-banner reveal-up">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h2 class="mb-3" data-zh="参与项目" data-en="Join the Project">参与项目</h2>
+                                    <p class="mb-0" data-zh="如果您有自己的想法或者金点子，请提交给我们或直接参与项目，在此欢迎各位，您的反馈是我们持续前进的动力。" data-en="If you have your own ideas or great thoughts, please submit them to us or join the project directly. Everyone is welcome here, and your feedback is the driving force for our continuous progress.">如果您有自己的想法或者金点子，请提交给我们或直接参与项目，在此欢迎各位，您的反馈是我们持续前进的动力。</p>
+                                </div>
+                                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                    <a href="http://dev.wenyinos.com/my/" class="btn btn-white btn-lg">
+                                        <i class="fab fa-gitlab"></i><span data-zh="项目管理" data-en="Project Mgmt">项目管理</span><span class="btn-arrow">→</span>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -392,25 +411,24 @@
         </section>
 
         <!-- ======================== 开源项目展示区 ======================== -->
-        <section class="section section-lg" id="download" style="background-color: #f5f0ff;">
+        <section class="section section-lg opensource-section" id="download">
             <div class="container">
                 <div class="row align-items-center reveal-up">
                     <div class="col-lg-8">
-                        <h2 class="h1 mb-3"><strong>Open Source</strong> Project</h2>
-                        <p class="lead mb-4" data-zh="UNIX很简单，但需要有一定天赋的人才能理解这种简单。<br>如果debugging是一种消灭bug的过程，那编程就一定是把bug放进去的过程。<br>程序员和上帝打赌要开发出更大更好——傻瓜都会用的软件。而上帝却总能创造出更大更傻的傻瓜。所以，上帝总能赢。" data-en="UNIX is simple, but it takes a genius to understand the simplicity.<br>If debugging is the process of removing bugs, then programming must be the process of putting them in.<br>Programmers compete with God to create bigger and better foolproof software. But God always creates bigger fools. So God always wins.">UNIX很简单，但需要有一定天赋的人才能理解这种简单。<br>如果debugging是一种消灭bug的过程，那编程就一定是把bug放进去的过程。<br>程序员和上帝打赌要开发出更大更好——傻瓜都会用的软件。而上帝却总能创造出更大更傻的傻瓜。所以，上帝总能赢。</p>
+                        <h2 class="h1 mb-4" style="font-family: var(--font-display);"><strong>Open Source</strong> Project</h2>
+                        <p class="opensource-quote mb-4" data-zh="UNIX很简单，但需要有一定天赋的人才能理解这种简单。<br>如果debugging是一种消灭bug的过程，那编程就一定是把bug放进去的过程。<br>程序员和上帝打赌要开发出更大更好——傻瓜都会用的软件。而上帝却总能创造出更大更傻的傻瓜。所以，上帝总能赢。" data-en="UNIX is simple, but it takes a genius to understand the simplicity.<br>If debugging is the process of removing bugs, then programming must be the process of putting them in.<br>Programmers compete with God to create bigger and better foolproof software. But God always creates bigger fools. So God always wins.">UNIX很简单，但需要有一定天赋的人才能理解这种简单。<br>如果debugging是一种消灭bug的过程，那编程就一定是把bug放进去的过程。<br>程序员和上帝打赌要开发出更大更好——傻瓜都会用的软件。而上帝却总能创造出更大更傻的傻瓜。所以，上帝总能赢。</p>
                         <div class="d-flex align-items-center flex-wrap gap-3">
-                            <a href="https://github.com/WenYin-Community" target="_blank" class="btn btn-dark btn-lg">
-                                <i class="fab fa-github me-2"></i><span data-zh="在GitHub上查看" data-en="View on GitHub">在GitHub上查看</span>
+                            <a href="https://github.com/WenYin-Community" target="_blank" class="btn btn-primary-solid btn-lg">
+                                <i class="fab fa-github"></i><span data-zh="在GitHub上查看" data-en="View on GitHub">在GitHub上查看</span><span class="btn-arrow">→</span>
                             </a>
-                            <a class="github-button" href="https://github.com/WenYin-Community"
-                                data-color-scheme="no-preference: dark; light: light; dark: light;"
-                                data-icon="octicon-star" data-size="large" data-show-count="true"
-                                aria-label="Star WenYin-Community on GitHub">Star</a>
+                            <a href="https://gitee.com/wenyinos" target="_blank" class="btn btn-outline-purple btn-lg">
+                                <i class="fas fa-code-branch"></i><span data-zh="Gitee 仓库" data-en="Gitee Repos">Gitee 仓库</span><span class="btn-arrow">→</span>
+                            </a>
                         </div>
                     </div>
                     <div class="col-lg-4 text-center d-none d-lg-block">
                         <div class="github-icon">
-                            <i class="fab fa-github-alt fa-10x opacity-25" style="color: var(--purple-primary);"></i>
+                            <i class="fab fa-github-alt fa-10x" style="color: var(--purple-primary); opacity: 0.15;"></i>
                         </div>
                     </div>
                 </div>
@@ -423,49 +441,49 @@
         <div class="container">
             <div class="row g-4">
                 <div class="col-lg-5 mb-4 mb-lg-0">
-                    <img src="./assets/img/wenyin-logo.png" height="40" alt="WenYin Logo" class="mb-3">
-                    <p class="mb-2" data-zh="玟茵开源社区不仅仅是一个开源技术社区，更是广大爱好者交流之地。" data-en="WenYin Open Source Community is not just an open source technology community, but also a place for enthusiasts to communicate.">玟茵开源社区不仅仅是一个开源技术社区，更是广大爱好者交流之地。</p>
+                    <img src="./assets/img/wenyin-logo.png" height="36" alt="WenYin Logo" class="mb-3">
+                    <p class="footer-desc mb-2" data-zh="玟茵开源社区不仅仅是一个开源技术社区，更是广大爱好者交流之地。" data-en="WenYin Open Source Community is not just an open source technology community, but also a place for enthusiasts to communicate.">玟茵开源社区不仅仅是一个开源技术社区，更是广大爱好者交流之地。</p>
                     <p class="small"><a href="https://getbootstrap.com/" target="_blank" data-zh="本站由Bootstrap 5强力驱动" data-en="Powered by Bootstrap 5">本站由Bootstrap 5强力驱动</a></p>
-                    <div class="d-flex gap-3 mt-3">
-                        <a href="mailto:admin@wenyinos.com" class="fs-5"><i class="fas fa-envelope"></i></a>
-                        <a href="https://github.com/WenYin-Community" class="fs-5"><i class="fab fa-github"></i></a>
-                        <a href="https://gitee.com/wenyinos" class="fs-5"><i class="fab fa-git-alt"></i></a>
+                    <div class="footer-social d-flex gap-2 mt-3">
+                        <a href="mailto:admin@wenyinos.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+                        <a href="https://github.com/WenYin-Community" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                        <a href="https://gitee.com/wenyinos" aria-label="Gitee"><i class="fab fa-git-alt"></i></a>
                     </div>
                     <div class="mt-3">
                         <a href="https://www.qiniu.com/" target="_blank">
-                            <img src="./assets/img/qiniu-transparent.png" height="25" alt="七牛云">
+                            <img src="./assets/img/qiniu-transparent.png" height="22" alt="七牛云">
                         </a>
                     </div>
                 </div>
 
                 <div class="col-6 col-lg-3 mb-4 mb-lg-0">
-                    <h3 class="h6 text-uppercase mb-3 fw-bold" data-zh="友情链接" data-en="Friend Links">友情链接</h3>
+                    <h3 data-zh="友情链接" data-en="Friend Links">友情链接</h3>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="https://www.zsite.com/" target="_blank">臻网建站平台</a></li>
-                        <li class="mb-2"><a href="http://lotrc.com/" target="_blank">夕阳下的草垛</a></li>
-                        <li class="mb-2"><a href="https://morfans.cn/" target="_blank">魔帆博客</a></li>
-                        <li class="mb-2"><a href="https://nthxsz.top/" target="_blank">濑·栖·屋 Microsoft NK</a></li>
-                        <li class="mb-2"><a href="https://narukeu.cc/" target="_blank">Na Rukeu - Blog</a></li>
-                        <li class="mb-2"><a href="https://hikaricalyx.com/" target="_blank">光卡科技（仮）</a></li>
-                        <li class="mb-2"><a href="https://fuchsia-china.com/" target="_blank">Fuchsia 中文社区</a></li>
+                        <li><a href="https://www.zsite.com/" target="_blank">臻网建站平台</a></li>
+                        <li><a href="http://lotrc.com/" target="_blank">夕阳下的草垛</a></li>
+                        <li><a href="https://morfans.cn/" target="_blank">魔帆博客</a></li>
+                        <li><a href="https://nthxsz.top/" target="_blank">濑·栖·屋 Microsoft NK</a></li>
+                        <li><a href="https://narukeu.cc/" target="_blank">Na Rukeu - Blog</a></li>
+                        <li><a href="https://hikaricalyx.com/" target="_blank">光卡科技（仮）</a></li>
+                        <li><a href="https://fuchsia-china.com/" target="_blank">Fuchsia 中文社区</a></li>
                     </ul>
                 </div>
 
                 <div class="col-6 col-lg-4">
-                    <h3 class="h6 text-uppercase mb-3 fw-bold" data-zh="联系方式" data-en="Contact">联系方式</h3>
+                    <h3 data-zh="联系方式" data-en="Contact">联系方式</h3>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="mailto:ruojiner@hotmail.com">ruojiner@hotmail.com</a></li>
-                        <li class="mb-2"><a href="mailto:ruojiner@163.com">ruojiner@163.com</a></li>
-                        <li class="mb-2"><span data-zh="企业微信：" data-en="WeCom: ">企业微信：</span></li>
+                        <li><a href="mailto:ruojiner@hotmail.com">ruojiner@hotmail.com</a></li>
+                        <li><a href="mailto:ruojiner@163.com">ruojiner@163.com</a></li>
+                        <li><span class="footer-desc" data-zh="企业微信：" data-en="WeCom: ">企业微信：</span></li>
                     </ul>
-                    <img src="./assets/img/wenyin_qr.png" height="100" alt="微信二维码" class="mt-2">
+                    <img src="./assets/img/wenyin_qr.png" height="96" alt="微信二维码" class="mt-2">
                 </div>
             </div>
 
             <hr class="my-4">
             <div class="row">
                 <div class="col text-center">
-                    <p class="small mb-0" style="color: var(--text-muted-purple);">
+                    <p class="footer-copyright mb-0">
                         Copyleft &copy; <span data-zh="玟茵开源社区" data-en="WenYin Open Source Community">玟茵开源社区</span> 2013-<span class="current-year">2026</span>
                     </p>
                 </div>
@@ -473,10 +491,8 @@
         </div>
     </footer>
 
-    <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- GitHub Buttons -->
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!-- Bootstrap 5 JS Bundle (local) -->
+    <script src="./assets/lib/bootstrap/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
     <script src="./assets/js/main.js"></script>
 </body>

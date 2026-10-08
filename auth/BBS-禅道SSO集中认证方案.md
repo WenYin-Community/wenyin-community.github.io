@@ -844,7 +844,7 @@ rsync -av --exclude 'auth/.env' --exclude '.git/'  本地wenyin-community.github
 
 **实测**：ruojiner SSO 兑换并绑定 `sso_uid` ✓；发布 / 删除 paste ✓；M-2 双设备场景（撤销后首次写操作 401「登录已失效」）✓；受限用户 403「未开通本站访问」✓；游客公开浏览 ✓；测试数据已还原。
 
-**部署**：`make-production.sh`（v4.11 起）生成第四份生产 `.env`（PasteBin）；仓库产物含 `production-bbs-kv.sql` 等不变；PasteBin 以宝塔 Node 项目 / PM2 启动，`database.sqlite` 随源码上传（已 gitignore）。
+**部署**：`make-production.sh`（v4.11 起）生成第四份生产 `.env`（PasteBin）；PasteBin 以宝塔 Node 项目 / PM2 启动，`database.sqlite` 随源码上传（已 gitignore）。**站点 nginx 已由宝塔面板反向代理功能配好**（`vhost/nginx/proxy/paste.wenyinos.com/*.conf`，指向 Node 端口）——无需改动，仅确认反代目标端口与 Node 监听一致。生产实际站点配置汇总见 `wenyinos-env/nginx/bt-panel/bt/`（四站点，含 [WY] 标记的变更点）。
 
 **存量用户对接（已完成）**：`ruojiner` 按名自动绑定；`天知道` 更名为 `tianzhidao`（中文名保留于中心 realname 昵称）、`Sadosasaki` 中心建同名账号——两者中心 uid 已直接写入本地 `sso_uid`，paste 数据完整继承（实测 tianzhidao 可管理其历史片段）。中心侧初始密码已交付管理员分发给本人（建议首次登录后自行修改）。
 

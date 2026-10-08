@@ -14,7 +14,7 @@ Official website for **WenYin Open Source Community** (玟茵开源社区), buil
 
 ## 🔐 Unified Authentication
 
-This site hosts the **WenYin Open Source Community unified authentication center** at [`/auth`](https://wenyinos.com/auth/): one account for the whole community — sign in once and you stay signed in across the community sites (forum & ZenTao), with centralized user management and per-site access control. Self-service registration and password recovery (via SMTP) are included.
+This site hosts the **WenYin Open Source Community unified authentication center** at [`/auth`](https://wenyinos.com/auth/): one account for the whole community — sign in once and you stay signed in across the community sites (forum & ZenTao), with centralized user management and per-site access control. Self-service registration and password recovery (via SMTP) are included. Security baseline: double-layer password hashing (`bcrypt` over legacy md5, transparently migrated), rate limiting, anti-crawler protection and hardened session cookies.
 
 - Login entry: <https://wenyinos.com/auth/login.php>
 - Account panel: <https://wenyinos.com/auth/index.php>

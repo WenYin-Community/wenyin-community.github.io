@@ -125,7 +125,7 @@ BBS登录(前端已md5) ──────┘      │ 验签+时间窗+nonce+�
 CREATE TABLE users (
   uid INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(32) NOT NULL UNIQUE,
-  password CHAR(32) NOT NULL,           -- md5(明文)
+  password VARCHAR(60) NOT NULL,        -- 双层哈希 bcrypt(md5(明文))（v4.10.6 安全升级，见安全性报告 H-1）
   email VARCHAR(90) DEFAULT NULL UNIQUE,  -- NULL 允许多个（public 号无邮箱）；空串一律转 NULL
   realname VARCHAR(60) NOT NULL DEFAULT '',
   status TINYINT NOT NULL DEFAULT 1,    -- 1正常 0禁用
@@ -788,3 +788,41 @@ rsync -av --exclude 'auth/.env' --exclude '.git/'  本地wenyin-community.github
 实现：中心 `login.php` 已登录访问 → 302 面板；BBS `hook/index_inc_route_before.php`、禅道 `common/ext/model/hook/checkPriv.php` + `user/ext/model/wyauth.php`（identifyByWyAuth 三态返回 true / 'denied' / false）——均定向中心 `login_url`（已登录时自动进面板）。
 
 实测（vtest_limited）：禅道首页/任务页、BBS 首页/版块页/发帖页 → 全部弹回面板 ✓；中心退出后两站恢复游客 ✓；已开通用户（vtest_forum）、无票据游客、伪造票据均不受影响 ✓。
+
+### 15.16 安全加固落地（v4.10.6，2026-10-08）
+
+按《统一认证安全性报告》（wenyinos-env/统一认证安全性报告.md）完成上线前必修与首轮建议加固，逐项证据见报告"修复核销表"：
+
+**必修项**
+1. **密码双层哈希**：中心与禅道密码统一为 `bcrypt(md5(明文))`——离线批处理全库转换（中心 14 个、禅道 6 个有效密码；空密码账号随首次登录/改密自动升级），表结构 `password VARCHAR(60)`；原密码照常登录、用户零感知。中心新增 `wy_password_hash` / `wy_password_verify`（兼容读取历史 32 位值作纵深防御）；禅道扩展覆盖 `identify`（双层校验）与 `create`/`update`/`updatePassword`（写后修正为双层）；upsert 写入双层。
+2. **API 越权收敛**：`/api/password` 支持 `old_password` 校验——自助改密路径强制携带，管理员重置场景不带并由审计标记 `password_sync_admin`；`password` 参数改为可选（纯资料同步不再强制）。
+3. **禅道暴露面封禁**：Tengine 封禁 `/install.php`、`/upgrade.php`、`/checktable.php`、`api-*`（getModel/sql/debug）、`editor-*` 及 `?m=api` / `?m=editor` 查询形式——**覆盖大小写与 pathinfo 变体**（实测 13 类路径全部 404：含 `install.php/`、`INSTALL.PHP`、`%2F`、`?m=EDITOR` 等；正常页面不受影响）。注意 `install.php` 在 `config/my.php` 完好时仅 302 拒绝，**一旦配置丢失任何访客可触发全新安装**（系统接管），封禁为必须项。**全新部署渠道保留**：开源代码本身不含任何安装限制，封禁仅存在于运行态 nginx 配置——全新部署阶段**不启用封禁段**（通过 install.php 完成安装向导），安装完成后启用；两阶段切换指引见生产片段文件 `wenyinos-env/nginx/production-snippets.conf`。
+4. **BBS sitename 存储型 XSS（CVE-2020-21495）**：`index.htm` / `header.inc.htm` 输出转义——实测探针注入后原样转义输出（raw=0）。
+5. **HTTPS/HSTS**：生产配置片段已交付（301 跳转 + HSTS + 安全响应头），部署时并入。
+
+**建议项（首轮加固）**
+6. 中心会话：session cookie 增加 `secure`（绑定 `WY_COOKIE_SECURE`）；登录成功后 `session_regenerate_id`（防会话固定）。
+7. BBS cookie：`bbs_token` / `bbs_sid` 补 `HttpOnly` + `SameSite=Lax` + 按协议动态 `Secure`（响应头实测确认）。
+8. 注册/找回页枚举文案收敛（"该用户名/邮箱暂不可用"）；找回页接入 Turnstile（后台配置后自动生效）。
+9. 邮件限速增强：找回邮件增加"单账号 24h/10 封 + 全站 1h/60 封"（验证码邮件既有全站限速保持）。
+10. **单点登出轻量校验（M-2）**：分站已登录用户写操作（POST）每 30 分钟校验一次中心票据——中心登出/撤票 → 本地登出（2xxx 静默）；站点准入撤销 → 本地登出并定向中心（1xxx）；中心不可达静默降级。双设备场景实测：撤销后首次操作即掉线、未撤销时不受影响。
+
+**保持不变（经评审决定）**：M-1 密码传输协议维持 md5+HTTPS+HMAC（独立攻击面有限且双层哈希后中心库不再存明文 md5）；L-1 登出维持 GET（分站跳转架构决定，低危）。
+
+**部署衔接**：本地两库已完成扩容与升级（随全量覆盖带走）；部署顺序仍为"先源码、后组模型 SQL"；`wenyinos-env/tool/upgrade-password-hash.php` 已纳入物料（若生产另行导入旧数据可重跑，幂等）。
+
+### 15.17 认证中心反爬虫（v4.10.7，2026-10-08）
+
+认证中心（/auth）为真人交互入口，**不需要任何爬虫访问**。三层实施：
+
+| 层 | 措施 | 说明 |
+|---|---|---|
+| 协议声明 | 主站 `robots.txt` 增加 `Disallow: /auth/` | 对遵守协议的爬虫生效（随主站仓库发布） |
+| 响应头 | 全部页面与接口统一输出 `X-Robots-Tag: noindex, nofollow, noarchive`（`auth/core.php` 统一发 + nginx 双保险） | 阻止搜索引擎收录与归档 |
+| 运行拦截 | nginx 对 `/auth/` 路径：**限速**（5r/s，burst 15）+ **爬虫/空 UA 拒绝**（bot/spider/crawl/scrapy/python/wget 等关键词 → 403） | 对不守协议的扫描器/采集器生效 |
+
+**api.php 豁免**：`location ~* ^/auth/api\.php$` 独立放行（不判 UA、不限速）——分站服务端调用（PHP curl 默认 UA 为空）必须畅通，其安全性由 HMAC 签名 + nonce 保障。
+
+**实测**：浏览器 UA 200；Googlebot / bingbot / 百度 / GPTBot / Scrapy / python-requests / Wget / 空 UA → 403；连打 30 次触发限速（16×200 + 14×503，3 秒后恢复）；API 豁免正常（python UA 调 api.php → 200）；SSO 全链路（中心登录 → 禅道 [11] / BBS 兑换）回归不受影响；robots.txt 与响应头输出确认。
+
+**部署**：nginx 配置见 `wenyinos-env/nginx/production-snippets.conf` 第五节（http 级 limit_req_zone + 两个 location，并入主站 server 块）。

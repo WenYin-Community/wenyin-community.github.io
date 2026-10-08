@@ -826,3 +826,41 @@ rsync -av --exclude 'auth/.env' --exclude '.git/'  本地wenyin-community.github
 **实测**：浏览器 UA 200；Googlebot / bingbot / 百度 / GPTBot / Scrapy / python-requests / Wget / 空 UA → 403；连打 30 次触发限速（16×200 + 14×503，3 秒后恢复）；API 豁免正常（python UA 调 api.php → 200）；SSO 全链路（中心登录 → 禅道 [11] / BBS 兑换）回归不受影响；robots.txt 与响应头输出确认。
 
 **部署**：nginx 配置见 `wenyinos-env/nginx/production-snippets.conf` 第五节（http 级 limit_req_zone + 两个 location，并入主站 server 块）。
+
+### 15.18 PasteBin 接入统一认证（v4.11，2026-10-08）
+
+第四站接入：https://paste.wenyinos.com/（Node.js / Express 5 + SQLite 自有项目）。按要求**不保留原有认证方式**——原注册 / 登录 / 图形验证码整体移除，本地不再保存任何密码。
+
+**架构适配**（Node 无框架级扩展机制，采用"服务端票据兑换 + 本地 JWT"）：
+
+- **后端** `GET /api/sso`：服务端读取 `wy_auth`（HttpOnly，前端 JS 不可读）→ HMAC-SHA256 签名调用中心 ticket API（Node 内置 fetch，零新依赖）→ 用户 upsert（`users.sso_uid` 映射中心 uid；**存量用户按用户名自动绑定**）→ 签发原有 JWT（24h）
+- **前端**：页面加载时静默调 `/api/sso`（浏览器持中心票据即自动登录）；「登录」按钮跳中心登录页；「退出」清 JWT 并跳中心 logout（全域登出）；`GET /api/config` 下发登录/退出地址
+- **受限用户屏蔽（v4.11.3，对齐 BBS/禅道语义）**：持票据但未开通本站 → `/api/sso` 返回 403 携带 loginUrl → 前端**自动定向回认证中心**（已登录时进入面板查看"未开通"提示，中心退出后恢复游客浏览）；写操作途中站点准入被撤销（M-2 校验 1xxx）同样定向中心；票据撤销（2xxx）则本地 401 转游客
+- **配置**：`.env`（`process.loadEnvFile` 加载；`.env.example` 模板；`.gitignore` 已排除 .env / database.sqlite / .jwt-secret）
+- **M-2 对齐**：写操作（POST/DELETE）每 30 分钟校验一次中心票据——撤销即 401（前端转为游客、用户重新登录）；中心不可达或浏览器无票据时静默降级不加锁
+- **降级**：中心不可达仅游客浏览公开列表（无本地密码兜底，符合"不保留"要求）
+
+**中心侧**：`apps` 表新增 `paste` 应用（第三枚站点密钥）；准入 = 超级管理 / 开发团队 / 注册用户（受限用户不可用）；账号面板新增「代码粘贴」站点卡片（`WY_SITE_PASTE`）。
+
+**实测**：ruojiner SSO 兑换并绑定 `sso_uid` ✓；发布 / 删除 paste ✓；M-2 双设备场景（撤销后首次写操作 401「登录已失效」）✓；受限用户 403「未开通本站访问」✓；游客公开浏览 ✓；测试数据已还原。
+
+**部署**：`make-production.sh`（v4.11 起）生成第四份生产 `.env`（PasteBin）；仓库产物含 `production-bbs-kv.sql` 等不变；PasteBin 以宝塔 Node 项目 / PM2 启动，`database.sqlite` 随源码上传（已 gitignore）。
+
+**存量用户对接（已完成）**：`ruojiner` 按名自动绑定；`天知道` 更名为 `tianzhidao`（中文名保留于中心 realname 昵称）、`Sadosasaki` 中心建同名账号——两者中心 uid 已直接写入本地 `sso_uid`，paste 数据完整继承（实测 tianzhidao 可管理其历史片段）。中心侧初始密码已交付管理员分发给本人（建议首次登录后自行修改）。
+
+**新增站点接入清单（组管理动态化，v4.11.1）**：组管理的站点勾选项改为**动态读取 `apps` 表**（新增站点零改码、停用应用自动隐藏）；账号面板卡片未配置 `$site_meta` 时以通用卡片兜底显示（不再跳过）。未来接入新站点的完整步骤：
+
+1. **中心**：`apps` 表插入应用（app_id / name / secret）——「组管理」勾选项与「应用密钥」页自动出现；
+2. **中心 `.env`**：增加 `WY_SITE_<APP>` 站点入口 URL（账号面板跳转用）；
+3. （可选）中心 `index.php` 的 `$site_meta` 增加卡片名称/描述/图标（缺省有通用卡片兜底）；
+4. **新站点侧**：按本站架构接入（PHP 站点用 ext/hook 模式、Node 站点用"服务端票据兑换 + 本地 JWT"模式），密钥从中心「应用密钥」页取得。
+
+### 15.19 登录来源提示与回跳（v4.11.4，2026-10-08）
+
+正常用户从分站引导至中心（分站「登录」入口跳转携带 Referer）时，中心自动识别来源站点（`wy_guess_referer_site()`：与已配置站点白名单按 host 匹配，输出用配置内 URL——无开放重定向面；**显示标题取自 apps 表 name**，与组管理/密钥页同一数据源，缺省退回 host）：
+
+- **登录页**：表单上方提示「您刚才访问的是 **社区论坛**，登录后即可进入」——未登录时告知来源与去向；
+- **账号面板**：顶部提示「您刚才访问的是 **社区论坛** —— **点击进入**」——一键回到来源站（来源记录存于会话，登录成功 session regenerate 后保留）；
+- **边界**：无 Referer（直接访问中心）无提示；来源站点不在用户可访问范围（受限场景）不显示（"点击进入"仅在可进入时出现）；识别支持多站点（forum/dev/paste 通用）。
+
+**实测**：带 forum / paste Referer 登录 → 登录页与面板提示正确（标题"社区论坛"/"代码粘贴" + 点击进入链接指向对应站点）✓；无 Referer 无提示 ✓；受限用户带 Referer 登录不显示 ✓；面板正常渲染回归 ✓。

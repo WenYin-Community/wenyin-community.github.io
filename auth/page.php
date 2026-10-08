@@ -50,6 +50,10 @@ body { min-height: 100%; margin: 0; font-family: -apple-system, "Segoe UI", "Not
 .form-control:focus { border-color: #6d4bb8; box-shadow: 0 0 0 3px rgba(109, 75, 184, .12); }
 .field-group { margin-bottom: 20px; }
 .field-hint { font-size: 12px; color: #b3aac9; margin-top: 5px; }
+.ref-notice { background: #f2eefc; border: 1px solid #d9cdf2; color: #5c3da3; border-radius: 10px; padding: 12px 16px; font-size: 13px; margin-bottom: 20px; }
+.ref-notice b { color: #402a75; }
+.ref-notice a { color: #5c3da3; font-weight: 600; text-decoration: none; }
+.ref-notice a:hover { text-decoration: underline; }
 .submit { width: 100%; height: 44px; font-size: 16px; border-radius: 8px; letter-spacing: 4px; background: #6d4bb8; border-color: #6d4bb8; color: #fff; }
 .submit:hover { background: #5c3da3; border-color: #5c3da3; color: #fff; }
 .link-row { display: flex; justify-content: space-between; margin-top: 16px; font-size: 13px; }

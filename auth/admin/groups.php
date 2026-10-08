@@ -2,7 +2,12 @@
 // wenyinos 认证中心 · 后台：组管理
 require __DIR__ . '/_layout.php';
 
-$APPS = array('forum' => '论坛（forum）', 'dev' => '禅道（dev）');
+// 站点选项从 apps 表动态读取（新增站点接入零改码；停用的应用自动隐藏）
+$APPS = array();
+foreach(wy_db()->query('SELECT app_id, name FROM apps WHERE status = 1 ORDER BY app_id ASC')->fetchAll() as $row)
+{
+	$APPS[$row['app_id']] = $row['name'] . '（' . $row['app_id'] . '）';
+}
 
 $notice = '';
 $error = '';
@@ -72,6 +77,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 		{
 			$stmt = wy_db()->prepare('DELETE FROM groups WHERE id = ?');
 			$stmt->execute(array($id));
+			// 防护：若被删组正是注册默认组，回落为「注册用户」(id 4)，防止新注册用户无组
+			if(intval(wy_setting('register_group', '4')) === $id) wy_setting_set('register_group', '4');
 			wy_audit('auth', $admin_user['uid'], 'admin_group_delete');
 			$notice = '组已删除';
 		}

@@ -390,9 +390,30 @@ function wy_setting_set($key, $value)
 	return $stmt->execute(array($key, (string)$value));
 }
 
-// ---------------- base_url（邮件链接等绝对地址；WY_BASE_URL 配置优先） ----------------
+// ---------------- 登录来源识别（从分站跳转而来时用于提示回跳） ----------------
+// 依据 HTTP_REFERER 与已配置站点（白名单）匹配，返回 array('app_id','url','host','title') 或 NULL
+// title 取 apps 表 name（网站标题）；查不到时退回 host
+function wy_guess_referer_site()
+{
+	$ref = isset($_SERVER['HTTP_REFERER']) ? (string)$_SERVER['HTTP_REFERER'] : '';
+	if($ref === '') return NULL;
+	$ref_host = parse_url($ref, PHP_URL_HOST);
+	if(!$ref_host) return NULL;
+	foreach(wy_config('sites') as $app_id => $url)
+	{
+		$host = parse_url($url, PHP_URL_HOST);
+		if($host && strcasecmp($host, $ref_host) === 0)
+		{
+			$stmt = wy_db()->prepare('SELECT name FROM apps WHERE app_id = ? LIMIT 1');
+			$stmt->execute(array($app_id));
+			$row = $stmt->fetch();
+			return array('app_id' => $app_id, 'url' => $url, 'host' => $host, 'title' => $row && $row['name'] !== '' ? $row['name'] : $host);
+		}
+	}
+	return NULL;
+}
 
-function wy_base_url()
+// ---------------- base_url（邮件链接等绝对地址；WY_BASE_URL 配置优先） ----------------function wy_base_url()
 {
 	static $base = NULL;
 	if($base === NULL)

@@ -4,6 +4,10 @@ require __DIR__ . '/core.php';
 require __DIR__ . '/page.php';
 wy_session_start();
 
+// 来源站点识别（由分站跳转而来）：本页提示 + 面板「点击进入」回跳
+$ref_site = wy_guess_referer_site();
+if($ref_site) $_SESSION['wy_ref_site'] = $ref_site;
+
 // 已登录访问登录页 → 直接进入账号面板（受限用户从分站定向回来时看到面板提示）
 if(wy_current_user())
 {
@@ -76,6 +80,10 @@ if(empty($_SESSION['csrf'])) $_SESSION['csrf'] = wy_rand_hex(32);
 
 wy_page_head('登录', '欢迎登录', '统一认证中心');
 ?>
+
+<?php if($ref_site): ?>
+<div class="ref-notice">您刚才访问的是 <b><?php echo wy_h($ref_site['title']); ?></b>，登录后即可进入</div>
+<?php endif; ?>
 
 <?php wy_error_box($error); ?>
 

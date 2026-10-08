@@ -1,6 +1,7 @@
 <?php
 // wenyinos 认证中心 · 账号面板（登录后）
 require __DIR__ . '/core.php';
+wy_session_start();
 
 $user = wy_current_user();
 if(!$user)
@@ -16,9 +17,14 @@ $is_super = wy_is_super($user['uid']);
 $group_names = array();
 foreach($groups as $g) $group_names[] = $g['name'];
 
+// 来源站点提示（从分站引导而来）：仅在用户可访问该站时显示「点击进入」回跳
+$ref_site = isset($_SESSION['wy_ref_site']) ? $_SESSION['wy_ref_site'] : wy_guess_referer_site();
+if($ref_site && !in_array($ref_site['app_id'], $apps, true)) $ref_site = NULL;
+
 $site_meta = array(
 	'forum' => array('name' => '社区论坛', 'desc' => '交流 · 反馈 · 分享', 'icon' => 'fa-comments'),
 	'dev'   => array('name' => '项目管理', 'desc' => '需求 · 任务 · 缺陷', 'icon' => 'fa-diagram-project'),
+	'paste' => array('name' => '代码粘贴', 'desc' => '分享 · 片段 · 代码', 'icon' => 'fa-file-code'),
 );
 ?>
 <!DOCTYPE html>
@@ -65,6 +71,10 @@ body { margin: 0; font-family: -apple-system, "Segoe UI", "Noto Sans SC", "PingF
 .sys-name { font-size: 26px; font-weight: 700; color: #2d2640; margin: 0 0 28px; letter-spacing: 1px; }
 
 .card-block { background: #fff; border: 1px solid #eee8fa; border-radius: 14px; padding: 22px 24px; margin-bottom: 20px; box-shadow: 0 6px 20px rgba(109, 75, 184, .05); }
+.ref-notice { background: #f2eefc; border: 1px solid #d9cdf2; color: #5c3da3; border-radius: 10px; padding: 12px 16px; font-size: 13px; margin-bottom: 16px; }
+.ref-notice b { color: #402a75; }
+.ref-notice a { color: #5c3da3; font-weight: 600; text-decoration: none; }
+.ref-notice a:hover { text-decoration: underline; }
 .card-title { font-size: 14px; font-weight: 600; color: #2d2640; margin: 0 0 16px; display: flex; align-items: center; gap: 8px; }
 .card-title i { color: #6d4bb8; }
 
@@ -132,6 +142,10 @@ body { margin: 0; font-family: -apple-system, "Segoe UI", "Noto Sans SC", "PingF
 			<div class="welcome">欢迎回来</div>
 			<h2 class="sys-name">我的账号</h2>
 
+			<?php if($ref_site): ?>
+			<div class="ref-notice">您刚才访问的是 <b><?php echo wy_h($ref_site['title']); ?></b> —— <a href="<?php echo wy_h($ref_site['url']); ?>">点击进入</a></div>
+			<?php endif; ?>
+
 			<!-- 账号信息 -->
 			<div class="card-block">
 				<div class="card-title"><i class="fas fa-id-card"></i> 账号信息</div>
@@ -146,7 +160,7 @@ body { margin: 0; font-family: -apple-system, "Segoe UI", "Noto Sans SC", "PingF
 				<div class="card-title"><i class="fas fa-globe"></i> 可访问站点</div>
 				<?php if($apps): ?>
 				<div class="site-grid">
-					<?php foreach(array_keys($sites) as $app_id): if(!in_array($app_id, $apps, true) || !isset($site_meta[$app_id])) continue; $m = $site_meta[$app_id]; ?>
+					<?php foreach(array_keys($sites) as $app_id): if(!in_array($app_id, $apps, true)) continue; $m = isset($site_meta[$app_id]) ? $site_meta[$app_id] : array('name' => $app_id, 'desc' => '', 'icon' => 'fa-globe'); ?>
 					<a class="site-card" href="<?php echo wy_h($sites[$app_id]); ?>">
 						<div class="sc-icon"><i class="fas <?php echo $m['icon']; ?>"></i></div>
 						<div>

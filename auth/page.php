@@ -8,6 +8,8 @@ function wy_page_head($title, $box_welcome = '欢迎登录', $box_title = '统�
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon/favicon-32x32.png">
 <title><?php echo wy_h($title); ?> · 玟茵开源社区</title>
 <link rel="stylesheet" href="../assets/lib/bootstrap/bootstrap.min.css">
 <link rel="stylesheet" href="../assets/lib/font-awesome/css/all.min.css">

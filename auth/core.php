@@ -4,6 +4,9 @@
 
 date_default_timezone_set(wy_config('timezone'));
 
+// 反爬虫：认证中心为真人交互入口，全部页面与接口禁止被索引/归档（robots.txt 之外的协议层声明）
+header('X-Robots-Tag: noindex, nofollow, noarchive');
+
 function wy_config($key = null)
 {
 	static $config = null;
@@ -310,9 +313,25 @@ function wy_session_start()
 	if(session_status() === PHP_SESSION_NONE)
 	{
 		session_name('wy_sid');
-		session_set_cookie_params(array('path' => '/', 'httponly' => true, 'samesite' => 'Lax'));
+		session_set_cookie_params(array('path' => '/', 'httponly' => true, 'samesite' => 'Lax', 'secure' => (bool)wy_config('cookie_secure')));
 		session_start();
 	}
+}
+
+// ---------------- 密码哈希（双层：bcrypt(md5(明文))） ----------------
+// 历史存储为无盐 md5(明文)（兼容禅道导入）；已离线批量升级为双层哈希，
+// 校验失败时兼容读取 32 位历史值（纵深防御，正常流程不会出现）
+
+function wy_password_hash($password_md5)
+{
+	return password_hash((string)$password_md5, PASSWORD_BCRYPT);
+}
+
+function wy_password_verify($password_md5, $stored)
+{
+	$stored = (string)$stored;
+	if(strlen($stored) === 32) return hash_equals($stored, (string)$password_md5);
+	return password_verify((string)$password_md5, $stored);
 }
 
 // 中心当前登录用户（基于 wy_auth cookie 解析；返回 user 行或 false）
@@ -501,7 +520,7 @@ function wy_try_legacy(&$user, $password_md5, $app_id = 'auth')
 	if(empty($user['bbs_password']) || empty($user['bbs_salt'])) return FALSE;
 	if(!hash_equals($user['bbs_password'], md5($password_md5 . $user['bbs_salt']))) return FALSE;
 	$stmt = wy_db()->prepare('UPDATE users SET password = ?, bbs_password = NULL, bbs_salt = NULL WHERE uid = ?');
-	$stmt->execute(array($password_md5, $user['uid']));
+	$stmt->execute(array(wy_password_hash($password_md5), $user['uid']));
 	$user['password'] = $password_md5;
 	wy_audit($app_id, $user['uid'], 'legacy_upgrade');
 	return TRUE;
@@ -516,7 +535,7 @@ function wy_register_ip_exceeded()
 	return intval($row['n']) >= 3;
 }
 
-// 找回邮件发送限速：同 uid 60 秒内一次、同 IP 10 分钟 5 次
+// 找回邮件发送限速：同 uid 60 秒 1 次 + 24 小时 10 次；同 IP 10 分钟 5 次；全站 1 小时 60 封（防代理池轰炸）
 function wy_reset_mail_allowed($uid)
 {
 	$uid = intval($uid);
@@ -524,9 +543,17 @@ function wy_reset_mail_allowed($uid)
 	$stmt->execute(array($uid, time() - 60));
 	if(intval($stmt->fetch()['n']) > 0) return FALSE;
 
+	$stmt = wy_db()->prepare('SELECT COUNT(*) AS n FROM audit_log WHERE action = \'reset_mail\' AND uid = ? AND date > ?');
+	$stmt->execute(array($uid, time() - 86400));
+	if(intval($stmt->fetch()['n']) >= 10) return FALSE;
+
 	$stmt = wy_db()->prepare('SELECT COUNT(*) AS n FROM audit_log WHERE action = \'reset_mail\' AND ip = ? AND date > ?');
 	$stmt->execute(array(wy_client_ip(), time() - 600));
-	return intval($stmt->fetch()['n']) < 5;
+	if(intval($stmt->fetch()['n']) >= 5) return FALSE;
+
+	$stmt = wy_db()->prepare('SELECT COUNT(*) AS n FROM audit_log WHERE action = \'reset_mail\' AND date > ?');
+	$stmt->execute(array(time() - 3600));
+	return intval($stmt->fetch()['n']) < 60;
 }
 
 // ---------------- 人机验证（Cloudflare Turnstile，仅注册使用；后台配置 site_key/secret_key） ----------------

@@ -40,7 +40,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 	else
 	{
 		$stmt = wy_db()->prepare('UPDATE users SET password = ?, reset_token = NULL, reset_expire = 0, fails = 0, lock_until = 0, verified = 1 WHERE uid = ?');
-		$stmt->execute(array(md5($password), $user['uid']));
+		$stmt->execute(array(wy_password_hash(md5($password)), $user['uid']));
 		wy_audit('auth', $user['uid'], 'reset_ok');
 		$done = TRUE;
 	}

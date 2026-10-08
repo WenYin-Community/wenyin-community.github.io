@@ -68,7 +68,7 @@ function wy_api_verify($app, $data)
 	$remain = wy_lock_remaining($user);
 	if($remain > 0) wy_json(1005, '账号已锁定，请 ' . ceil($remain / 60) . ' 分钟后再试');
 
-	if(!hash_equals($user['password'], $password) && !wy_try_legacy($user, $password, $app['app_id']))
+	if(!wy_password_verify($password, $user['password']) && !wy_try_legacy($user, $password, $app['app_id']))
 	{
 		// 老论坛凭证升级路径由 wy_try_legacy 处理（BBS 休眠号 md5(md5(明文).salt)）
 		wy_login_fail($user, $app['app_id']);
@@ -127,15 +127,27 @@ function wy_api_password($app, $data)
 	$email = isset($data['email']) ? trim((string)$data['email']) : '';
 	$realname = isset($data['realname']) ? trim((string)$data['realname']) : '';
 
-	if($account === '' || !preg_match('/^[a-f0-9]{32}$/', $password)) wy_json(3001, '参数不完整或密码格式错误');
+	if($account === '') wy_json(3001, '账号不能为空');
+	if($password !== '' && !preg_match('/^[a-f0-9]{32}$/', $password)) wy_json(3001, '密码格式错误');
 
 	$user = wy_find_user($account);
 	if(!$user) wy_json(1001, '用户不存在');
 
-	// 密码更新
-	$stmt = wy_db()->prepare('UPDATE users SET password = ? WHERE uid = ?');
-	$stmt->execute(array($password, $user['uid']));
-	wy_audit($app['app_id'], $user['uid'], 'password_sync');
+	// 密码更新（可选；双层哈希）。提供时校验旧密码（H-2）：自助改密路径强制携带；
+	// 管理员重置场景不带（另行审计标记），secret 泄露时无法无凭据改普通用户密码
+	if($password !== '')
+	{
+		$old_password = isset($data['old_password']) ? strtolower(trim((string)$data['old_password'])) : '';
+		if($old_password !== '')
+		{
+			if(!preg_match('/^[a-f0-9]{32}$/', $old_password)) wy_json(3001, '旧密码格式错误');
+			if(!wy_password_verify($old_password, $user['password'])) wy_json(1002, '旧密码错误');
+		}
+
+		$stmt = wy_db()->prepare('UPDATE users SET password = ? WHERE uid = ?');
+		$stmt->execute(array(wy_password_hash($password), $user['uid']));
+		wy_audit($app['app_id'], $user['uid'], $old_password !== '' ? 'password_sync' : 'password_sync_admin');
+	}
 
 	// 昵称可选更新
 	if($realname !== '' && $realname !== $user['realname'])
@@ -221,7 +233,7 @@ function wy_api_migrate($app, $data)
 	}
 
 	$stmt = wy_db()->prepare('INSERT INTO users (username, password, email, realname, status, create_date) VALUES (?, ?, NULLIF(?, \'\'), ?, 1, ?)');
-	$stmt->execute(array($account, $password, $email, $realname, time()));
+	$stmt->execute(array($account, wy_password_hash($password), $email, $realname, time()));
 	$uid = wy_db()->lastInsertId();
 
 	// 归「注册用户」组（id=4）并展开准入（migrate 仅来自 BBS）

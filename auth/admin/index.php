@@ -38,7 +38,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 		else
 		{
 			$stmt = wy_db()->prepare('INSERT INTO users (username, password, email, realname, status, create_date) VALUES (?, ?, NULLIF(?, \'\'), ?, 1, ?)');
-			$stmt->execute(array($username, md5($password), $email, $realname, time()));
+			$stmt->execute(array($username, wy_password_hash(md5($password)), $email, $realname, time()));
 			$new_uid = wy_db()->lastInsertId();
 			foreach($group_ids as $gid)
 			{
@@ -76,7 +76,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 		else
 		{
 			$stmt = wy_db()->prepare('UPDATE users SET password = ?, fails = 0, lock_until = 0 WHERE uid = ?');
-			$stmt->execute(array(md5($newpw), $uid));
+			$stmt->execute(array(wy_password_hash(md5($newpw)), $uid));
 			wy_audit('auth', $admin_user['uid'], 'admin_password_reset');
 			$notice = '密码已重置';
 		}

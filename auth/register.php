@@ -55,16 +55,16 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 		}
 		elseif(wy_find_user($form['username']))
 		{
-			$error = '用户名已被使用';
+			$error = '该用户名暂不可用';
 		}
 		elseif(wy_find_user($form['email']))
 		{
-			$error = '邮箱已被注册';
+			$error = '该邮箱暂不可用';
 		}
 		else
 		{
 			$stmt = wy_db()->prepare('INSERT INTO users (username, password, email, realname, status, verified, create_date) VALUES (?, ?, ?, ?, 1, 0, ?)');
-			$stmt->execute(array($form['username'], md5($password), $form['email'], $form['realname'], time()));
+			$stmt->execute(array($form['username'], wy_password_hash(md5($password)), $form['email'], $form['realname'], time()));
 			$uid = wy_db()->lastInsertId();
 
 			$default_group = intval(wy_setting('register_group', '4'));

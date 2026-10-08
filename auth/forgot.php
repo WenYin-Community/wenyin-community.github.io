@@ -7,6 +7,8 @@ wy_session_start();
 $error = '';
 $done = FALSE;
 $email = '';
+$captcha_enabled = wy_captcha_enabled();
+$captcha_site_key = wy_setting('turnstile_site_key', '');
 
 if($_SERVER['REQUEST_METHOD'] === 'POST')
 {
@@ -15,6 +17,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 	if(empty($_POST['csrf']) || empty($_SESSION['csrf']) || !hash_equals($_SESSION['csrf'], (string)$_POST['csrf']))
 	{
 		$error = '会话已过期，请重试';
+	}
+	elseif(($captcha = wy_captcha_verify(array('response' => isset($_POST['cf-turnstile-response']) ? $_POST['cf-turnstile-response'] : ''))) !== TRUE)
+	{
+		$error = $captcha;
 	}
 	elseif(!is_email_format($email))
 	{
@@ -76,12 +82,21 @@ wy_page_head('找回密码', '找回密码', '重置您的账号');
 		<input type="email" class="form-control" id="email" name="email" value="<?php echo wy_h($email); ?>" placeholder="请输入注册时使用的邮箱" required autofocus>
 		<div class="field-hint">系统将向该邮箱发送重置链接；未设置邮箱的账号请联系管理员重置。</div>
 	</div>
+	<?php if($captcha_enabled): ?>
+	<div class="field-group" style="margin-bottom:26px;">
+		<div class="cf-turnstile" data-sitekey="<?php echo wy_h($captcha_site_key); ?>" data-theme="light"></div>
+	</div>
+	<?php endif; ?>
 	<button type="submit" class="btn submit">发送重置邮件</button>
 </form>
 
 <div class="link-row" style="justify-content:center;">
 	<a href="login.php"><i class="fas fa-arrow-left" style="font-size:11px;"></i> 返回登录</a>
 </div>
+<?php endif; ?>
+
+<?php if($captcha_enabled && !$done): ?>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <?php endif; ?>
 
 <?php wy_page_foot(); ?>

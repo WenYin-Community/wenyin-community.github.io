@@ -50,7 +50,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 			{
 				$error = '账号已锁定，请 ' . ceil($remain / 60) . ' 分钟后再试';
 			}
-			elseif(!hash_equals($user['password'], md5($password)) && !wy_try_legacy($user, md5($password)))
+			elseif(!wy_password_verify(md5($password), $user['password']) && !wy_try_legacy($user, md5($password)))
 			{
 				wy_login_fail($user, 'auth');
 				$error = '账号或密码错误';
@@ -63,6 +63,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 			else
 			{
 				wy_login_success($user, 'auth');
+				session_regenerate_id(true);   // 登录后更换会话 ID（防会话固定）
 				wy_set_auth_cookie(wy_ticket_make($user['uid'], $user['username']));
 				header('Location: index.php');
 				exit;

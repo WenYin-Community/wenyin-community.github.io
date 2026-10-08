@@ -44,7 +44,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 		$new = (string)(isset($_POST['newpassword']) ? $_POST['newpassword'] : '');
 		$new2 = (string)(isset($_POST['newpassword2']) ? $_POST['newpassword2'] : '');
 
-		if(!hash_equals($user['password'], md5($old)))
+		if(!wy_password_verify(md5($old), $user['password']))
 		{
 			$error = '原密码不正确';
 			$error_card = 'password';
@@ -62,7 +62,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 		else
 		{
 			$stmt = wy_db()->prepare('UPDATE users SET password = ?, fails = 0, lock_until = 0 WHERE uid = ?');
-			$stmt->execute(array(md5($new), $user['uid']));
+			$stmt->execute(array(wy_password_hash(md5($new)), $user['uid']));
 			wy_audit('auth', $user['uid'], 'profile_password');
 			header('Location: profile.php?saved=password');
 			exit;

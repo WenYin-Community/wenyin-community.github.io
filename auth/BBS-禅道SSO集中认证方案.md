@@ -1,9 +1,10 @@
 # wenyinos.com 统一认证中心方案（v4 终稿）
 
 > 定稿日期：2026-10-07（v4 = v3 + 审核修复 13 项，此前版本作废）
+> 隐私说明：文中用户名均为「用户A~N」脱敏占位，个人邮箱与本地路径等信息已隐去
 > 数据来源：comm_wenyinos_2026-10-07_02-00-24（BBS 26 表 + EPS 57 表已废弃不采用）、dev_wenyinos_2026-10-07_02-00-32（禅道 208 表）
-> 备份文件：/home/zemi/MyWork/sql/*.sql.gz（导出自 MySQL 5.7.44）
-> 站点：主站 wenyinos.com（静态 Bootstrap 5，源码 /home/zemi/MyDev/wenyin-community.github.io，GitHub 仓库仅镜像，服务器手动部署）+ forum.wenyinos.com（Xiuno BBS 4.0.2）+ dev.wenyinos.com（禅道）
+> 备份文件：本地物料目录 *.sql.gz（导出自 MySQL 5.7.44）
+> 站点：主站 wenyinos.com（静态 Bootstrap 5；GitHub 仓库为开源镜像，服务器手动部署）+ forum.wenyinos.com（Xiuno BBS 4.0.2）+ dev.wenyinos.com（禅道）
 > 部署：同一生产服务器（Tengine）、同一 MySQL 实例；认证中心部署于 https://wenyinos.com/auth
 > 决策记录：EPS（主站遗留会员/商城系统，65 账号 2017 年后休眠）已废弃，不导入、不接入、不迁移
 
@@ -19,7 +20,7 @@
 | 6 | EPS 系统 | 废弃：不导入、不接入、不迁移 |
 | 7 | 组准入 | super_admin/core/member=forum+dev 双站、forum_only=仅论坛、public=仅禅道、limited=无（v4 验收时按 4.1 表执行且符合预期；v4.10 组模型已重构，见 15.15） |
 | 8 | BBS 休眠 6 号 | 无感迁移：首次登录 BBS 本地验证成功 → /api/migrate 上报中心 |
-| 9 | 中心超管 | 复用 ruojiner（禅道密码导入即中心密码），不另建账号 |
+| 9 | 中心超管 | 复用管理员账号（禅道密码导入即中心密码），不另建账号 |
 | 10 | 联调数据 | 两份备份可导入本机 MySQL 容器；导入后全部密码改写为统一测试值 + 生成虚拟用户补充联调 |
 | 11 | 反向同步 | 分站改密/改邮箱推回中心；邮箱冲突拒绝该字段不覆盖 |
 | 12 | 降级语义 | 中心宕机 → 分站本地密码验证照常，已登录用户不受影响 |
@@ -40,8 +41,8 @@
 
 | 系统 | 账号数 | 密码格式 | 最后活跃 |
 |---|---|---|---|
-| 禅道 zt_user | 8 | md5(明文) | wenyinos 2026-10-06（最活跃）、ruojiner 2026-08-05 |
-| BBS bbs_user | 10 | md5(md5(明文).salt) | ruojiner 2026-08-18（唯一近年活跃） |
+| 禅道 zt_user | 8 | md5(明文) | 最活跃账号 2026-10-06、管理员账号 2026-08-05 |
+| BBS bbs_user | 10 | md5(md5(明文).salt) | 管理员账号 2026-08-18（唯一近年活跃） |
 
 comm_wenyinos 库中的 EPS 系统（eps_* 57 表）为已废弃遗留系统，不导入、不接入、不迁移；其账号密码格式虽与中心兼容（同为 md5），日后如需回收再另行决策。
 
@@ -49,23 +50,23 @@ comm_wenyinos 库中的 EPS 系统（eps_* 57 表）为已废弃遗留系统，�
 
 | 用户名 | BBS | 禅道 | 中心处理 |
 |---|---|---|---|
-| ruojiner | ✓ gid=1 管理员组 | ✓ 管理员组1+核心开发4，公司 admins 名单 | 三平台管理员；密码取禅道；中心 super_admin |
-| weijie | ✓ gid=101 | ✓ 核心开发4 | email 两端一致（weijie001@139.com）；密码取禅道 |
-| wenyinos | ✓ gid=101（email=ruojiner@163.com，ruojiner 代注） | ✓ 参与项目6（email=weijie001@foxmail.com） | 品牌号，实为 weijie 侧账号；email/密码以禅道为准 |
-| narukeu | ✗ | ✓ 核心开发4 | 仅禅道；密码取禅道 |
+| 用户A | ✓ gid=1 管理员组 | ✓ 管理员组1+核心开发4，公司 admins 名单 | 三平台管理员；密码取禅道；中心 super_admin |
+| 用户B | ✓ gid=101 | ✓ 核心开发4 | email 两端一致；密码取禅道 |
+| 用户C | ✓ gid=101（email 由用户A 代注） | ✓ 参与项目6 | 品牌副号，实为用户B 侧账号；email/密码以禅道为准 |
+| 用户D | ✗ | ✓ 核心开发4 | 仅禅道；密码取禅道 |
 
-注：禅道 weijie 与 wenyinos 密码哈希相同（同一明文），确认为同一人两个号。
+注：禅道用户B 与用户C 密码哈希相同（同一明文），确认为同一人两个号。
 
 ### 2.3 其余账号
 
-- **仅 BBS（6 个，2018-2021 注册后休眠）**：Windelight、pingtaip、lza07、pingtaisan、zccrs、MeredithJeames —— 密码为 md5(md5.盐) **无法转换为中心格式**，采用无感迁移（见第六节登录 hook 逻辑）
+- **仅 BBS（6 个，2018-2021 注册后休眠）**：用户H、用户G、用户I、用户J、用户F、用户K —— 密码为 md5(md5.盐) **无法转换为中心格式**，采用无感迁移（见第六节登录 hook 逻辑）
 - **仅禅道（3 个）**：public1/2/3，公用账号组13，密码直接导入
 
 ### 2.4 密码权威切换（导入即生效）
 
 | 账号 | 导入后全域密码 | 说明 |
 |---|---|---|
-| ruojiner / weijie / wenyinos / liuweizzuie / narukeu / public1-3 | 禅道现密码 | BBS 旧密码作废；首次登录 BBS 时 upsert 自动覆盖本地密码 |
+| 用户A / 用户B / 用户C / 用户E / 用户D / public1-3 | 禅道现密码 | BBS 旧密码作废；首次登录 BBS 时 upsert 自动覆盖本地密码 |
 | BBS 休眠 6 号 | 仍为 BBS 本地密码 | 无感迁移：首次登录 BBS 验证本地密码成功后上报中心，之后全域统一 |
 
 ## 三、架构
@@ -194,14 +195,14 @@ INSERT INTO groups (id, name, apps, bbs_gid, zentao_group, sort, remark) VALUES
 
 | 中心组 | 站点准入 | BBS 映射 gid | 禅道映射组 | 初始成员 | 依据 |
 |---|---|---|---|---|---|
-| super_admin | forum+dev | 1（管理员组） | 1（管理员，406 权限位） | ruojiner | zt_company admins=ruojiner；bbs gid=1 |
-| core | forum+dev | 101 | 4（核心开发，214 权限位） | weijie、narukeu | zt_usergroup 实测 |
-| member | forum+dev | 101 | 6（参与项目，181 权限位） | wenyinos | zt_usergroup 实测 |
+| super_admin | forum+dev | 1（管理员组） | 1（管理员，406 权限位） | 用户A | zt_company admins=用户A；bbs gid=1 |
+| core | forum+dev | 101 | 4（核心开发，214 权限位） | 用户B、用户D | zt_usergroup 实测 |
+| member | forum+dev | 101 | 6（参与项目，181 权限位） | 用户C | zt_usergroup 实测 |
 | forum_only | 仅 forum | 101 | —（无禅道权限） | BBS 休眠 6 号（迁移后归入） | 新增，承接 BBS 独有账号 |
 | public | 仅 dev | — | 13（公用账号，104 权限位） | public1/2/3 | zt_usergroup 实测 |
 | limited | 无 | — | 12（restricted，1 权限位） | — | 对应禅道受限组 |
 
-规则：中心组携带 bbs_gid / zentao_group 映射列。**多组归并口径**：zentao_groups 以数组下发（upsert 时按数组重写 zt_usergroup 全部成员关系，ruojiner 保持组1+组4 两行，与禅道现状一致）；bbs_gid 单值 = 用户所属组中 sort 最小的组的 bbs_gid（超级管理 > 开发团队 > 注册用户；v4.10 起组名同步），如 ruojiner 取 gid=1。禅道 admins 名单（zt_company）保持本地权威不动；BBS 101+ 等级由发帖数自治不受影响。
+规则：中心组携带 bbs_gid / zentao_group 映射列。**多组归并口径**：zentao_groups 以数组下发（upsert 时按数组重写 zt_usergroup 全部成员关系，用户A 保持组1+组4 两行，与禅道现状一致）；bbs_gid 单值 = 用户所属组中 sort 最小的组的 bbs_gid（超级管理 > 开发团队 > 注册用户；v4.10 起组名同步），如用户A 取 gid=1。禅道 admins 名单（zt_company）保持本地权威不动；BBS 101+ 等级由发帖数自治不受影响。
 
 ### 4.2 两站组权限实测数据（供中心后台展示参考）
 
@@ -294,7 +295,7 @@ module/common/ext/model/hook/checkPriv.php  # 一行：未登录且 wy_auth cook
 - identifyByWyAuth 模仿 `identifyByCookie()`（`user/model.php:696-711`）：组装 user 对象（rights/groups/visits 更新）+ session->set('user') + keepLogin
 - upsert：查 zt_user 无此 account 则 insert（password=md5(明文)、role、realname、email、visits=1）+ 按 zentao_groups 数组重写 zt_usergroup；已有则更新 password（realname/email 不覆盖）
 - identify hook（v4 修正触发条件）：仅当传入密码长度 **<32**（明文交互登录路径，原生逻辑 `strlen($password)<32` 走 md5 比对）且中心 verify 成功时执行 upsert，随后不 return 让原生查询命中；密码为 32 位（cookie 随机哈希）或 40 位（sha1）时是自动登录路径，不调中心
-- 无 admin 白名单（v4 移除）：ruojiner 也是中心普通用户，密码跟随中心；应急降级路径 = 中心宕机时禅道本地密码验证
+- 无 admin 白名单（v4 移除）：用户A 也是中心普通用户，密码跟随中心；应急降级路径 = 中心宕机时禅道本地密码验证
 - 反向同步：updatePassword()/update() 覆盖中 parent:: 成功后 POST /api/password；中心不可达 3 秒超时，记日志不阻塞
 
 ## 八、账号导入实施（一次性 SQL）
@@ -335,15 +336,15 @@ JOIN wenyinos_auth.users u ON u.username = g.account;
 
 ### 8.3 BBS 账号处理
 
-- 同名 4 号（ruojiner/weijie/wenyinos/liuweizzuie）：已被禅道导入覆盖，无需操作（密码以禅道为准）
-- 独有 6 休眠号（Windelight/lza07/pingtaisan/MeredithJeames/pingtaip/zccrs）：**BBS 登录页已屏蔽后不再有本地输入窗口**，迁移改为**中心 legacy 凭证**（v4.1 修订）：
+- 同名 4 号（用户A/用户B/用户C/用户E）：已被禅道导入覆盖，无需操作（密码以禅道为准）
+- 独有 6 休眠号（用户H/用户I/用户J/用户K/用户G/用户F）：**BBS 登录页已屏蔽后不再有本地输入窗口**，迁移改为**中心 legacy 凭证**（v4.1 修订）：
 
 ```sql
 -- 休眠号导入中心：携带原 BBS 哈希作为 legacy 凭证（主密码留空）
 INSERT IGNORE INTO wenyinos_auth.users (username, password, email, realname, status, create_date, bbs_password, bbs_salt)
 SELECT username, '', NULLIF(email,''), realname, 1, UNIX_TIMESTAMP(), password, salt
 FROM comm_wenyinos.bbs_user
-WHERE username NOT IN ('ruojiner','weijie','wenyinos','liuweizzuie');
+WHERE username NOT IN ('user_a','user_b','user_c','user_e');
 
 -- 归「注册用户」组（id=4）并展开准入（勿遗漏；v4.10 起组名与禅道同步）
 INSERT IGNORE INTO wenyinos_auth.user_group (uid, group_id)
@@ -388,9 +389,9 @@ WHERE ug.uid IN (SELECT uid FROM wenyinos_auth.users WHERE bbs_password IS NOT N
 
 ## 十一、验收清单
 
-- [ ] 禅道 8 账号导入中心后，原密码可登录禅道与 BBS（ruojiner 用禅道密码）
+- [ ] 禅道 8 账号导入中心后，原密码可登录禅道与 BBS（用户A 用禅道密码）
 - [ ] 中心创建用户仅授权 forum → 禅道登录提示未开通；仅授权 dev → BBS 同理
-- [ ] BBS 休眠账号（如 zccrs）用 BBS 原密码登录 BBS 成功，且登录后中心出现该账号（无感迁移）
+- [ ] BBS 休眠账号（如用户F）用 BBS 原密码登录 BBS 成功，且登录后中心出现该账号（无感迁移）
 - [ ] 迁移后的 BBS 账号在禅道用同一密码可登录（upsert 生效）
 - [ ] 主站 /auth 登录 → 切 forum / dev 均已登录（首次各一次 API 兑换）
 - [ ] 分站登出后票据已销毁，切站不再自动登录
@@ -402,16 +403,16 @@ WHERE ug.uid IN (SELECT uid FROM wenyinos_auth.users WHERE bbs_password IS NOT N
 ## 十二、本地联调环境（已备）
 
 - Podman：mysql:5.7 容器（已验证 5.7.44 + utf8mb4 + 宽松 sql_mode）+ php:8.5-fpm 镜像（已构建，含 mysqli/pdo_mysql/gd/zip/opcache）+ nginx:alpine 配置三 vhost
-- 环境：/home/zemi/MyDev/wenyinos-env/（env.sh 管理脚本、三域名 *.wenyinos.test hosts 映射 127.0.0.1:8080、自检页已就位）
+- 环境：本地物料目录 wenyinos-env/（env.sh 管理脚本、三域名 *.wenyinos.test hosts 映射 127.0.0.1:8080、自检页已就位）
 - 本地联调特殊配置：wy_auth cookie 域 .wenyinos.test；**secure_cookie=0**（本地 http，Secure 标记会被浏览器丢弃，上线改 1）；各端点 URL 由配置项指向本地域名
-- 联调数据策略：导入备份后将全部 password 改写为 md5('test123456')，另生成虚拟用户（各中心组至少 1 名）覆盖验收场景；本地库名与线上一致（comm_wenyinos / dev_wenyinos / wenyinos_auth），第八节 SQL 原样可用
+- 联调数据策略：导入备份后将全部 password 改写为统一测试值，另生成虚拟用户（各中心组至少 1 名）覆盖验收场景；本地库名与线上一致（comm_wenyinos / dev_wenyinos / wenyinos_auth），第八节 SQL 原样可用
 - 服务器对齐：MySQL 5.7.44（与备份导出版本一致）/ PHP 8.5 / Nginx(Tengine)
 
 ## 十三、风险与边界（定稿口径）
 
 - md5(明文) 弱哈希为既定决策；暴露面经 HMAC 签名/时间窗/nonce/限流/HTTPS 收窄
 - 主站镜像仓库公开（GitHub），auth/ 含密钥必须排除在仓库外（.gitignore + 服务器手动部署）
-- weijie 与 wenyinos 为同一人两号（密码哈希相同），中心各自保留为独立账号，不做合并
+- 用户B 与用户C 为同一人两号（密码哈希相同），中心各自保留为独立账号，不做合并
 - BBS url_rewrite_on=0（?sso-xxx.htm 形式），插件路由按此格式注册
 - 禅道 requestType=PATH_INFO（服务器现状），本地 nginx 已配 PATH_INFO 透传
 - 票据兑换依赖 .wenyinos.com 跨子域 cookie；若浏览器拦截第三方 cookie 策略变化（SameSite=Lax 顶级导航携带，当前兼容），后续如失效可升级为跳转式兑换
@@ -423,7 +424,7 @@ WHERE ug.uid IN (SELECT uid FROM wenyinos_auth.users WHERE bbs_password IS NOT N
 | 1 | 阻断 | users.email 改 NULL DEFAULT NULL，导入用 NULLIF(email,'')——避免 public1-3 空串撞唯一键 | 第四节/8.2 |
 | 2 | 阻断 | apps_json 改逗号串 apps 字段 + FIND_IN_SET，弃 JSON_TABLE（MySQL 5.7 不支持） | 第四节/8.1 |
 | 3 | 阻断 | 禅道 identify hook 触发条件改为"密码长度 <32"（32/40 为自动登录路径不调中心） | 第七节 |
-| 4 | 阻断 | zentao_groups 数组下发（upsert 重写 zt_usergroup 多行，保留 ruojiner 组1+组4）；bbs_gid 按组 sort 最小值归并单值 | 第五节/4.1 规则 |
+| 4 | 阻断 | zentao_groups 数组下发（upsert 重写 zt_usergroup 多行，保留用户A 组1+组4）；bbs_gid 按组 sort 最小值归并单值 | 第五节/4.1 规则 |
 | 5 | 缺口 | users 增 fails/lock_until 列，限流落地到表结构 | 第四节 |
 | 6 | 缺口 | 禅道补 logout 覆盖调 /api/revoke | 第七节 |
 | 7 | 缺口 | BBS 前台注册 user-create 由插件关闭 | 第六节 |
@@ -434,7 +435,7 @@ WHERE ug.uid IN (SELECT uid FROM wenyinos_auth.users WHERE bbs_password IS NOT N
 | 12 | 缺口 | BBS 插件结构调整：setting 置插件根目录、删前台路由注册 hook | 第六节 |
 | 13 | 缺口 | 票据未授权负缓存（$_SESSION['wy_sso_denied']） | 第六节 |
 
-v4 附带优化：移除 ruojiner admin 白名单（密码跟随中心，防脱钩）；本地库名与线上一致；audit_log 加 date 索引；verify 限流补 IP 维度。
+v4 附带优化：移除用户A admin 白名单（密码跟随中心，防脱钩）；本地库名与线上一致；audit_log 加 date 索引；verify 限流补 IP 维度。
 
 **实施中发现的补充修订（2026-10-07 导库实测）**：
 - 8.2 导入 SQL 的 `WHERE deleted = 0` 修正为 `deleted = '0'`——zt_user.deleted 是 enum('0','1')，enum 与数字比较按枚举索引匹配（0 永远不命中），原写法导入 0 行
@@ -448,18 +449,18 @@ v4 附带优化：移除 ruojiner admin 白名单（密码跟随中心，防脱�
 
 | # | 验收项 | 实测结果 |
 |---|---|---|
-| 1 | 禅道 8 账号导入后原密码登录禅道与 BBS | ✓ ruojiner/test123456 双端登录 |
+| 1 | 禅道 8 账号导入后原密码登录禅道与 BBS | ✓ 管理员账号原密码双端登录 |
 | 2 | 仅授权 forum → 禅道拒；仅授权 dev → BBS 拒 | ✓ vtest_forum 禅道拒（1004）；public1 BBS 拒 |
-| 3 | BBS 休眠号原密码登录 + 无感迁移 | ✓ zccrs、pingtaip（中心出现 forum_only 记录，audit user_migrate） |
-| 4 | 权限联动：后台改组 → 分站实时生效 | ✓ pingtaip 入 core → 禅道登录成功且组重写为[4]；移回 forum_only → 再登录被拒 |
+| 3 | BBS 休眠号原密码登录 + 无感迁移 | ✓ 用户F、用户G（中心出现 forum_only 记录，audit user_migrate） |
+| 4 | 权限联动：后台改组 → 分站实时生效 | ✓ 用户G 入 core → 禅道登录成功且组重写为[4]；移回 forum_only → 再登录被拒 |
 | 5 | 主站 /auth 登录 → forum/dev 均已登录 | ✓ 票据兑换（ticket_ok）双站自动登录 |
 | 6 | 分站登出后票据销毁、切站不自动登录 | ✓ BBS/禅道登出均写 revoked 黑名单，再兑换被拒 |
 | 7 | 双向改密闭环 | ✓ 禅道改密→BBS 新密码登录成功；BBS 改密→中心同步→禅道新密码登录成功 |
 | 8 | 签名/过期/重放拒绝 + 锁定 | ✓ api-test.py 20/20（含 2101/2105/1005/1008） |
 | 9 | 中心宕机降级 + 已登录不受影响 | ✓ 黑洞地址模拟不可达：双端本地密码降级登录成功，已登录会话正常 |
-| 10 | 组映射下发（core → 禅道组4、BBS gid=101） | ✓ ruojiner 禅道组保持[1,4]，weijie 组[4] |
+| 10 | 组映射下发（core → 禅道组4、BBS gid=101） | ✓ 用户A 禅道组保持[1,4]，用户B 组[4] |
 
-配套测试工具：`/home/zemi/MyDev/wenyinos-env/sql/api-test.py`（中心 API 全场景自动化，20 断言）、`setup-local.sql`（本地建库/导入/虚拟用户）。
+配套测试工具：`本地物料目录 wenyinos-env/sql/api-test.py`（中心 API 全场景自动化，20 断言）、`setup-local.sql`（本地建库/导入/虚拟用户）。
 
 ### 15.2 实施中修复的 8 个关键坑（部署必读）
 
@@ -493,7 +494,7 @@ v4 附带优化：移除 ruojiner admin 白名单（密码跟随中心，防脱�
 | 退出 | `user_logout_start`：revoke 票据 + 清本地会话/token + 302 → 中心 logout（清 wy_auth cookie 后回登录页） | `ext/control/logout.php`：原生清理 + revoke + 定向中心 logout |
 | 注册 | 保持拦截（提示走中心） | 无注册入口（原生） |
 
-**休眠号迁移机制升级（替代原无感迁移）**：BBS 登录页屏蔽后本地无输入窗口，改为**中心 legacy 凭证**——休眠号哈希（md5(md5(明文).salt)）随账号一次性导入中心 `bbs_password/bbs_salt` 列；用户在中心登录框输入原密码时，中心按 legacy 规则校验 `md5(输入 . bbs_salt)`，通过即**自动升级**为主密码（清空 legacy 字段，audit 记录 legacy_upgrade），此后全域正常。已实测 Windelight 升级成功。
+**休眠号迁移机制升级（替代原无感迁移）**：BBS 登录页屏蔽后本地无输入窗口，改为**中心 legacy 凭证**——休眠号哈希（md5(md5(明文).salt)）随账号一次性导入中心 `bbs_password/bbs_salt` 列；用户在中心登录框输入原密码时，中心按 legacy 规则校验 `md5(输入 . bbs_salt)`，通过即**自动升级**为主密码（清空 legacy 字段，audit 记录 legacy_upgrade），此后全域正常。已实测（休眠号用户升级成功）。
 （/api/migrate 端点保留在中心代码中作兼容，BBS 侧调用已移除。）
 
 新增配置项：BBS 插件设置页 `login_url / logout_url`；禅道 `config/wyauth.php` 的 `loginUrl / logoutUrl`。上线时均指向 `https://wenyinos.com/auth/...`。
@@ -731,8 +732,8 @@ rsync -av --exclude 'auth/.env' --exclude '.git/'  本地wenyin-community.github
 
 | 组 | 名称 | 权限 | 用户 |
 |---|---|---|---|
-| 1 | 超级管理 | 406 项完整 | ruojiner（经 zt_company.admins 超管名单全权） |
-| 4 | 开发团队 | 207 项（见下） | 除 ruojiner 外全部原有用户（weijie/narukeu/liuweizzuie/wenyinos/pingtaip/zemin） |
+| 1 | 超级管理 | 406 项完整 | 用户A（经 zt_company.admins 超管名单全权） |
+| 4 | 开发团队 | 207 项（见下） | 除用户A 外全部原有用户（用户B/用户D/用户E/用户C/用户G/用户L） |
 | 11 | 注册用户 | 91 项只读（无任何 create/edit/delete） | 新注册用户默认（经中心同名组下发）；亦为未登录访问（游客）权限源 |
 | 12 | 受限用户 | 1 项 my-limited | 保留（中心同名组映射） |
 
@@ -754,7 +755,7 @@ rsync -av --exclude 'auth/.env' --exclude '.git/'  本地wenyin-community.github
 
 （paste 为 v4.11 接入后追加；三组准入与中心库 apps 表动态联动。）
 
-**组对齐**：pingtaip（中心归入开发团队）、zemin（移除历史附加组）——禅道原有用户全部对齐开发团队；历史组 member/public 并入/清除。
+**组对齐**：用户G（中心归入开发团队）、用户L（移除历史附加组）——禅道原有用户全部对齐开发团队；历史组 member/public 并入/清除。
 
 **交付 SQL**（生产直接导入，幂等可重跑）：
 - `wenyinos-env/sql/production-zentao-groups.sql`（禅道库执行）
@@ -843,11 +844,11 @@ rsync -av --exclude 'auth/.env' --exclude '.git/'  本地wenyin-community.github
 
 **中心侧**：`apps` 表新增 `paste` 应用（第三枚站点密钥）；准入 = 超级管理 / 开发团队 / 注册用户（受限用户不可用）；账号面板新增「代码粘贴」站点卡片（`WY_SITE_PASTE`）。
 
-**实测**：ruojiner SSO 兑换并绑定 `sso_uid` ✓；发布 / 删除 paste ✓；M-2 双设备场景（撤销后首次写操作 401「登录已失效」）✓；受限用户 403「未开通本站访问」✓；游客公开浏览 ✓；测试数据已还原。
+**实测**：用户A SSO 兑换并绑定 `sso_uid` ✓；发布 / 删除 paste ✓；M-2 双设备场景（撤销后首次写操作 401「登录已失效」）✓；受限用户 403「未开通本站访问」✓；游客公开浏览 ✓；测试数据已还原。
 
 **部署**：`deploy/env/pastebin.env` 为 PasteBin 生产 `.env`（密钥取自中心库 apps 表）；PasteBin 以宝塔 Node 项目 / PM2 启动，`database.sqlite` 随源码上传（已 gitignore）。**站点 nginx 已由宝塔面板反向代理功能配好**（`vhost/nginx/proxy/paste.wenyinos.com/*.conf`，指向 Node 端口）——无需改动，仅确认反代目标端口与 Node 监听一致。生产实际站点配置汇总见 `wenyinos-env/nginx/bt-panel/bt/`（四站点，含 [WY] 标记的变更点）。
 
-**存量用户对接（已完成）**：`ruojiner` 按名自动绑定；`天知道` 更名为 `tianzhidao`（中文名保留于中心 realname 昵称）、`Sadosasaki` 中心建同名账号——两者中心 uid 已直接写入本地 `sso_uid`，paste 数据完整继承（实测 tianzhidao 可管理其历史片段）。中心侧初始密码已交付管理员分发给本人（建议首次登录后自行修改）。
+**存量用户对接（已完成）**：`用户A` 按名自动绑定；两位存量用户（一位原中文昵称保留于中心 realname、一位按原名建号）中心 uid 已直接写入本地 `sso_uid`，paste 数据完整继承（实测可管理其历史片段）。中心侧初始密码已交付管理员分发给本人（建议首次登录后自行修改）。
 
 **新增站点接入清单（组管理动态化，v4.11.1）**：组管理的站点勾选项改为**动态读取 `apps` 表**（新增站点零改码、停用应用自动隐藏）；账号面板卡片未配置 `$site_meta` 时以通用卡片兜底显示（不再跳过）。未来接入新站点的完整步骤：
 
@@ -871,8 +872,8 @@ rsync -av --exclude 'auth/.env' --exclude '.git/'  本地wenyin-community.github
 dump 路线部署上线后暴露并修复的问题（均经本地同版本环境实测 + 生产验收通过）：
 
 1. **账号凭证回填（v4.12.1）**：上线后真实密码登录报错。诊断确认**迁移数据完整**（生产库与交付 SQL 逐行一致），根因是中心库密码与休眠号为**开发联调期统一改写的测试密码哈希**（建库时改写、交付时未回填真实凭证；联调全程使用测试密码掩盖了该问题）。修复交付 `deploy/auth-repair-passwords.sql`：
-   - 禅道用户 5 人（ruojiner / weijie / narukeu / liuweizzuie / wenyinos）→ 主密码回填**真实凭证**（bcrypt 双层，另附论坛休眠号备用通道）；
-   - 纯 BBS 用户 6 人（zccrs / pingtaip / Windelight / lza07 / pingtaisan / MeredithJeames）→ 主密码清空 + **休眠号导入**（首次用原论坛密码登录自动升级为主密码）；
+   - 禅道用户 5 人 → 主密码回填**真实凭证**（bcrypt 双层，另附论坛休眠号备用通道）；
+   - 纯 BBS 用户 6 人 → 主密码清空 + **休眠号导入**（首次用原论坛密码登录自动升级为主密码）；
    - 全量清除登录锁定与失败计数。
    - **教训**：联调期统一测试密码的改写必须在交付前回填真实值。
 2. **PHP 8.5 兼容（v4.12.2）**：`curl_close()` 在 PHP 8.5 弃用（`wy_http_post` 外呼路径触发页面警告）——移除该调用（8.0 起句柄已自动管理）。

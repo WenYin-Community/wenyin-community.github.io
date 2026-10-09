@@ -23,9 +23,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 		{
 			$error = '用户名需为 2-32 位字母/数字/下划线';
 		}
-		elseif(strlen($password) < 6)
+		elseif(($pw_err = wy_password_policy_error($password, $username)) !== '')
 		{
-			$error = '密码至少 6 位';
+			$error = $pw_err;
 		}
 		elseif(wy_find_user($username))
 		{
@@ -69,9 +69,11 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 	elseif($action === 'resetpw' && $uid > 0)
 	{
 		$newpw = (string)(isset($_POST['newpassword']) ? $_POST['newpassword'] : '');
-		if(strlen($newpw) < 6)
+		$pw_target = wy_find_user_by_uid($uid);
+		$pw_err = wy_password_policy_error($newpw, $pw_target ? (string)$pw_target['username'] : '');
+		if($pw_err !== '')
 		{
-			$error = '密码至少 6 位';
+			$error = $pw_err;
 		}
 		else
 		{
@@ -163,7 +165,7 @@ admin_header('用户管理');
 							<input type="hidden" name="uid" value="<?php echo intval($u['uid']); ?>">
 							<button class="btn btn-sm btn-outline-secondary"><?php echo intval($u['status']) === 1 ? '禁用' : '启用'; ?></button>
 						</form>
-						<form method="post" class="d-inline" onsubmit="var p = prompt('输入新密码（至少 6 位）'); if(!p) return false; this.newpassword.value = p; return true;">
+						<form method="post" class="d-inline" onsubmit="var p = prompt('输入新密码（8-64 位，含字母和数字）'); if(!p) return false; this.newpassword.value = p; return true;">
 							<input type="hidden" name="csrf" value="<?php echo wy_h(admin_csrf()); ?>">
 							<input type="hidden" name="action" value="resetpw">
 							<input type="hidden" name="uid" value="<?php echo intval($u['uid']); ?>">

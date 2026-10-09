@@ -37,9 +37,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 	{
 		$error = '请输入正确的邮箱地址';
 	}
-	elseif(strlen($password) < 6)
+	elseif(($pw_err = wy_password_policy_error($password, $form['username'])) !== '')
 	{
-		$error = '密码至少 6 位';
+		$error = $pw_err;
 	}
 	elseif($password !== $password2)
 	{
@@ -130,7 +130,8 @@ wy_page_head('注册', '欢迎加入', '注册新账号');
 	</div>
 	<div class="field-group">
 		<label class="form-label" for="password">密码</label>
-		<input type="password" class="form-control" id="password" name="password" placeholder="至少 6 位" required>
+		<input type="password" class="form-control" id="password" name="password" placeholder="8-64 位，需含字母和数字" required>
+		<div class="field-hint">8-64 位，需同时包含字母和数字</div>
 	</div>
 	<div class="field-group" <?php echo $captcha_enabled ? '' : 'style="margin-bottom:26px;"'; ?>>
 		<label class="form-label" for="password2">确认密码</label>

@@ -29,9 +29,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 	{
 		$error = '链接无效或已过期，请重新发起找回密码';
 	}
-	elseif(strlen($password) < 6)
+	elseif(($pw_err = wy_password_policy_error($password, $user['username'])) !== '')
 	{
-		$error = '密码至少 6 位';
+		$error = $pw_err;
 	}
 	elseif($password !== $password2)
 	{
@@ -77,7 +77,8 @@ wy_page_head('重置密码', '重置密码', '设置新密码');
 	</div>
 	<div class="field-group">
 		<label class="form-label" for="password">新密码</label>
-		<input type="password" class="form-control" id="password" name="password" placeholder="至少 6 位" required autofocus>
+		<input type="password" class="form-control" id="password" name="password" placeholder="8-64 位，需含字母和数字" required autofocus>
+		<div class="field-hint">8-64 位，需同时包含字母和数字</div>
 	</div>
 	<div class="field-group" style="margin-bottom:26px;">
 		<label class="form-label" for="password2">确认新密码</label>

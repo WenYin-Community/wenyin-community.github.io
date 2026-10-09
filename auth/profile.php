@@ -49,9 +49,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 			$error = '原密码不正确';
 			$error_card = 'password';
 		}
-		elseif(strlen($new) < 6)
+		elseif(($pw_err = wy_password_policy_error($new, $user['username'])) !== '')
 		{
-			$error = '新密码至少 6 位';
+			$error = $pw_err;
 			$error_card = 'password';
 		}
 		elseif($new !== $new2)
@@ -310,7 +310,8 @@ body { min-height: 100%; margin: 0; font-family: -apple-system, "Segoe UI", "Not
 					<div class="row g-2 mb-3">
 						<div class="col-md-6">
 							<label class="form-label" for="newpassword">新密码</label>
-							<input type="password" class="form-control" id="newpassword" name="newpassword" placeholder="至少 6 位" required autocomplete="new-password">
+							<input type="password" class="form-control" id="newpassword" name="newpassword" placeholder="8-64 位，需含字母和数字" required autocomplete="new-password">
+							<div class="field-hint">8-64 位，需同时包含字母和数字</div>
 						</div>
 						<div class="col-md-6">
 							<label class="form-label" for="newpassword2">确认新密码</label>

@@ -544,7 +544,7 @@ BBS：    xiuno-bbs/plugin/xn_sso/            （12 个文件：6 hook + 函数�
 
 | 站点 | 必须排除 | 原因 |
 |---|---|---|
-| 禅道 | `config/my.php` | 生产配置（db / extensionLevel=1 / changeWeak 等）——指定不覆盖 |
+| 禅道 | `config/my.php` | 生产配置（db / changeWeak 等）——指定不覆盖 |
 | 禅道 | `module/user/ext/.env` | 生产 SSO 密钥（本地值覆盖 → SSO 全挂） |
 | 禅道 | `tmp/`、`www/data/` | 运行时缓存 / 用户上传与数据 |
 | BBS | `conf/conf.php`、`conf/smtp.conf.php` | 生产 db 与 SMTP 配置 |
@@ -561,7 +561,7 @@ rsync -av --exclude 'auth/.env' --exclude '.git/'  本地wenyin-community.github
 **二、部署后必做**
 1. **清一次生产 BBS 的 `tmp/`**（编译缓存须按新代码重建，否则插件 hook 不生效；之后后台启用/停用插件也会自动清）
 2. 服务器若开 opcache：`reload` php-fpm（三站）
-3. 禅道 `config/my.php` 确认 `extensionLevel = 1`（未被覆盖则天然保留）
+3. 禅道 `config/my.php` **添加** `$config->framework->extensionLevel = 1;`（扩展开关，默认 0——不设置则 ext 全部不加载、SSO 失效；见第五节坑表第 1 条）
 
 **三、数据部署（服务器操作；v4.12 修订：中心库整库直发路线）**
 
@@ -881,3 +881,16 @@ dump 路线部署上线后暴露并修复的问题（均经本地同版本环境
    - **教训**：被 SMTP 开关后置的发信路径在联调期必须开启实测一遍，不能只覆盖"开关关闭"分支。
 4. **密码复杂度规则上线（v4.12.2）**：注册 / 重置 / 改密 / 后台建号与重置**全部设密入口**统一校验（`wy_password_policy_error`：8-64 位、须同时含字母和数字、弱密码黑名单、不得与用户名相同），前台输入提示同步（见 15.8 / 15.9 修订）。
    - 边界：分站 API 密码同步（协议传 md5）无法校验明文复杂度；现有密码不受影响，规则仅约束新设置密码。
+
+### 15.21 账号切换与单点登出一致性保障（v4.13，2026-10-09）
+
+生产反馈"切换账号后 BBS/禅道仍显示上一个账号"。根因与修复（本地同版本环境全链路实测）：
+
+- **根因**：分站票据兑换仅在**本地未登录**时发生（BBS `empty($uid)` / 禅道 `!isLogon()`）；已登录请求完全不做中心身份比对——换账号（新票据）或从中心退出后，分站本地登录态（BBS session+token / 禅道 session+za/zp）继续生效；M-2 又只查"写操作+票据有效性"、不比对身份，导致旧账号残留。
+- **修复**（BBS `plugin/xn_sso/hook/index_inc_route_before.php` + 禅道 `module/common/ext/model/hook/checkPriv.php`、`module/user/ext/model/wyauth.php`）：
+  1. 兑换成功时把**本次票据值**记入分站会话 `$_SESSION['wy_sso_ticket_cur']`；
+  2. 已登录请求比对"当前 wy_auth 值 vs 记录值"，不一致即重兑：**新票据有效→切换为新账号**（重建本地身份）；**票据被清/失效→本地登出并 302 回中心**；**中心不可达→保持现状**（降级）。票据一致时**零网络开销**（纯字符串比对）；
+  3. 禅道登出修正为 `$_SESSION = array(); session_destroy();`——**必须先清空内存**：PHP 在请求结束（shutdown）会把内存 session 重新写回，导致"session 复活"清不掉；登出后 `die(header 中心)`，避免本请求按旧登录态渲染。
+- **行为升级**：中心退出后分站**立即**掉线（此前 M-2 对读页面有 ≤30 分钟窗口）——单点登出更完整。
+- **实测**：BBS/禅道双向切换自动生效、中心退出即 302 中心、随后恢复游客浏览、游客不受影响、中心不可达降级静默 ✓
+- **教训**：① **session_destroy 必须配合 `$_SESSION = array()`**（否则请求结束写回复活）；② **curl 的 cookie jar 不删除过期 cookie**（会继续携带 deleted/原值）——登录态类测试须模拟浏览器删除 cookie 或改用真实浏览器；③ 页面级断言要用头部用户区等精确标记（帖子作者名等会污染 grep 计数）；④ 禅道 super session 只是 `$_SESSION` 直写（无坑）；hook 链路定位可用探针法（file_put_contents 到挂载目录，用完即删）。

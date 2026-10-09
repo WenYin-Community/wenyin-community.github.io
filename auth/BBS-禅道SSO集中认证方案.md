@@ -537,7 +537,7 @@ BBS：    xiuno-bbs/plugin/xn_sso/            （12 个文件：6 hook + 函数�
 本地环境：wenyinos-env/（env.sh、sql/setup-local.sql、sql/api-test.py、.local-secrets）
 ```
 
-### 15.4 服务器部署（v4.9.2 修订：全量源码覆盖策略）
+### 15.4 服务器部署（v4.12 修订：源码全量覆盖 + 中心库整库直发）
 
 **一、源码部署 = 全量覆盖 + 排除清单**（三站各自排除，覆盖将造成配置/密钥/数据事故）：
 
@@ -562,28 +562,27 @@ rsync -av --exclude 'auth/.env' --exclude '.git/'  本地wenyin-community.github
 2. 服务器若开 opcache：`reload` php-fpm（三站）
 3. 禅道 `config/my.php` 确认 `extensionLevel = 1`（未被覆盖则天然保留）
 
-**三、数据部署（服务器操作；v4.10 追加权限组模型）**
+**三、数据部署（服务器操作；v4.12 修订：中心库整库直发路线）**
 
 前置事实（已确认）：生产两站库与开发基线**同源且备份后无新数据**；SSO 接入**未改动两站任何表结构** → 两站库**无需数据迁移**（保留原样即正确；生产密码从未被改动，无需"还原"）。
 
-1. 生产 MySQL 执行 `wenyinos-env/sql/production-init-ready.sql`（建中心库建表建组；密钥已由 `make-production.sh` 注入）
-2. **同实例导入账号**（生产 MySQL 直接执行；库名与本方案 SQL 一致，无需改）：
-   - 第八节 8.2：禅道账号导入 + 组关系映射（`WHERE deleted = '0'`）
-   - 第八节 8.3：BBS 休眠号 legacy 凭证导入 + 组 4 与准入展开
-   - 站点准入展开（8.1 的 FIND_IN_SET 语句）
-3. **权限组模型落地**（见 15.15）：
-   - 禅道库执行 `wenyinos-env/sql/production-zentao-groups.sql`（组 4=开发 权限收紧；组 11=访客只读；组 6/13 与 public 账号清除）
-   - 中心库执行 `wenyinos-env/sql/production-auth-groups.sql`（**须在账号导入之后**执行：组名与禅道同名同步（超级管理/开发团队/注册用户/受限用户）、member 并入开发团队、public 清除、pingtaip/zemin 组对齐、站点准入全量重算）
-4. 禅道侧：配置全在 `.env` 文件（无其他库操作）
-5. BBS 侧：后台启用插件 → 设置页填写（推荐，避免手拼 JSON）：中心 API/登录/登出地址 + app_id + secret（与中心 apps 表一致）
+中心库以本地开发库**整库导出直发**（`wenyinos-env/deploy/wenyinos_auth.sql`，已含全部存量账号、双层哈希密码、四组权限模型、三应用与密钥、站点准入物化）——原"建库 + 第八节账号导入 + production-auth-groups.sql"的步骤内容已全部物化在内，**无需再执行**：
 
-> `deploy-prepare.sh`（本地还原+导出）**本期不使用**：生产无回滚需求、两站库无需迁移；该脚本仅当未来需要"以本地库为基线另建部署"时备用。
+1. 生产 MySQL 导入 `wenyinos-env/deploy/wenyinos_auth.sql`（含建库语句，自动创建 `wenyinos_auth`）
+2. **禅道组模型落地**（见 15.15）：禅道库执行 `wenyinos-env/sql/production-zentao-groups.sql`（组 4=开发 权限收紧；组 11=访客只读；组 6/13 与 public 账号清除）
+3. BBS 库执行 `wenyinos-env/deploy/production-bbs-kv.sql`（插件配置；等价于后台设置页填写）
+4. 禅道侧：配置全在 `.env` 文件（无其他库操作）
+5. BBS 侧：清一次 `tmp/` 编译缓存（见上"部署后必做"）
+
+> 中心侧后续调整（增删站点、改组、调成员）由后台自动维护物化准入（`wy_rebuild_user_apps`），无需再手工跑 SQL。
+> 完整操作顺序、`.env` 放置位置与后台待办见 `wenyinos-env/deploy/README.md`。
+> 自制导出/部署脚本已删除（2026-10-09）；生产库导出与部署物料一律按标准流程手工操作。
 > 操作前建议对生产库做一次全量备份（安全习惯）。
 
-**四、文件级配置（不随库迁移，生产单独创建）**
-- 中心：`auth/.env`（复制 `.env.example`；`WY_TICKET_KEY=openssl rand -hex 32`、cookie 域 `.wenyinos.com` + `secure=true`、站点 HTTPS 域名）
-- 禅道：`module/user/ext/.env`（复制 `.env.example`；填生产 apiUrl/appId/secret）
-- 密钥一致性：中心 apps 表 secret ↔ 禅道 .env / BBS 后台设置；生产导入后建议在中心后台各轮换一次
+**四、文件级配置（不随库迁移；已按生产值生成于 `wenyinos-env/deploy/env/`）**
+- 中心 `auth.env`（含本部署专属 `WY_TICKET_KEY`；`WY_DB_USER/PASS` 为占位，按宝塔实际建库账号修改）
+- 禅道 `zentao.env` → `module/user/ext/.env`；PasteBin `pastebin.env` → 项目根 `.env`
+- 密钥一致性：三份 .env 的 secret 均取自中心库 apps 表且已内嵌一致；后续后台轮换密钥后，需将新 secret 同步到对应站点（BBS 后台设置页 / 禅道与 PasteBin 的 .env）
 
 **五、验收**：跑一轮第十一节验收清单（重点：跨域名 cookie 需 HTTPS）。
 
@@ -595,7 +594,7 @@ rsync -av --exclude 'auth/.env' --exclude '.git/'  本地wenyin-community.github
 
 **① 自助注册**（`register.php`，登录页有「注册新账号」入口）
 - 后台「系统设置」页控制：注册开关（开放/关闭）+ 新用户默认组（下拉选组，初始默认「注册用户」）+ **人机验证（Cloudflare Turnstile，仅注册页）** + **SMTP 认证开关**
-- 校验：用户名规则 / 邮箱合法且唯一 / 密码≥6 双确认 / Turnstile 人机验证（配置两项密钥后生效，清空 Site Key 即关闭；本地联调可用官方测试密钥）
+- 校验：用户名规则 / 邮箱合法且唯一 / **密码复杂度（8-64 位、须同时包含字母和数字、弱密码黑名单、不得与用户名相同，`wy_password_policy_error` 统一校验）** 双确认 / Turnstile 人机验证（配置两项密钥后生效，清空 Site Key 即关闭；本地联调可用官方测试密钥）
 - 防刷：同 IP 每小时注册上限 3 个
 - **注册后为「待验证」状态，验证通过前不可登录**（中心页与 API 双通道拦截，错误码 1009；超管豁免，users.verified 列，存量/管理创建/导入用户默认已验证）
 - **两种验证通道**（后台 SMTP 认证开关切换）：
@@ -622,7 +621,7 @@ rsync -av --exclude 'auth/.env' --exclude '.git/'  本地wenyin-community.github
 | 功能 | 流程 | 要点 |
 |---|---|---|
 | 改昵称 | 直接保存 | 最长 60 字符；仅改中心侧（分站 realname 不覆盖策略不变） |
-| 改密码 | 原密码校验 → 新密码≥6 双确认 | 修改后各分站下次登录时经中心 verify 自动同步；不强制登出当前会话 |
+| 改密码 | 原密码校验 → 新密码复杂度校验（8-64 位、含字母与数字、弱密码黑名单、不得与用户名相同）双确认 | 修改后各分站下次登录时经中心 verify 自动同步；不强制登出当前会话 |
 | 改邮箱 | **新邮箱输入 → 点「发送验证码」→ 查收邮件 → 填入验证码 → 「认证并保存邮箱」** | 验证码 6 位、10 分钟有效、一次性、须与新邮箱匹配；发送限速（会话 60 秒 + uid 10 分钟 5 次）；保存前二次查占用（防竞态）；保存成功即视为邮箱已验证(verified=1) |
 
 配套：`send_email_code.php`（AJAX 发码端点，需登录 + CSRF，发信失败自动撤销会话验证码）；验证码邮件为品牌 HTML 模板（`wy_code_mail_html`）；全部成功操作写 audit（profile_nickname / profile_password / profile_email）。
@@ -748,22 +747,24 @@ rsync -av --exclude 'auth/.env' --exclude '.git/'  本地wenyin-community.github
 
 | 中心组（id） | → 禅道组 | 准入 / 映射 |
 |---|---|---|
-| 超级管理（1） | 超级管理（1） | forum+dev；BBS gid=1 |
-| 开发团队（2） | 开发团队（4） | forum+dev；BBS gid=101（原 core+member 合并） |
-| 注册用户（4） | 注册用户（11） | forum+dev（禅道只读）；BBS gid=101；新注册默认组 |
+| 超级管理（1） | 超级管理（1） | forum+dev+paste；BBS gid=1 |
+| 开发团队（2） | 开发团队（4） | forum+dev+paste；BBS gid=101（原 core+member 合并） |
+| 注册用户（4） | 注册用户（11） | forum+dev+paste（禅道只读）；BBS gid=101；新注册默认组 |
 | 受限用户（6） | 受限用户（12） | 无站点准入 |
+
+（paste 为 v4.11 接入后追加；三组准入与中心库 apps 表动态联动。）
 
 **组对齐**：pingtaip（中心归入开发团队）、zemin（移除历史附加组）——禅道原有用户全部对齐开发团队；历史组 member/public 并入/清除。
 
 **交付 SQL**（生产直接导入，幂等可重跑）：
 - `wenyinos-env/sql/production-zentao-groups.sql`（禅道库执行）
-- `wenyinos-env/sql/production-auth-groups.sql`（中心库执行，须在账号导入之后）
+- 中心库侧内容（组模型、成员、准入物化）已并入 `deploy/wenyinos_auth.sql` 整库直发，无需单独执行（原 `production-auth-groups.sql` 保留备查）
 
 **验证（本地同源实测）**：
 - 注册用户（组 11）：任务查看 200；建任务 / 编辑任务 → deny 跳转；我的地盘 200；SSO 登录建号 zt_usergroup=[11]
 - 开发团队（组 4）：建任务 200；编辑他人任务 200（见上述边界）；公司资料编辑 / 在线代码编辑器 → deny；产品计划浏览 200
 - 组重写一致性：SSO 登录兑换后 zt_usergroup 与中心映射一致（开发团队 [4]、注册用户 [11]），与手动 SQL 结果相同（中心权威 upsert 与导入 SQL 双保险）
-- **准入物化重算**（v4.10.2 修复）：user_app 为 user_group × groups.apps 的物化展开——改组 apps 或调整成员后须全量重算（`production-auth-groups.sql` 第 5 节），否则存量用户（休眠号等）准入陈旧（注册用户组加 dev 准入后未重算会导致禅道侧被 1004 拒绝、静默落游客态）
+- **准入物化重算**（v4.10.2 修复）：user_app 为 user_group × groups.apps 的物化展开——后台保存组设置时自动对成员重算（`wy_rebuild_user_apps`）；直接改库的场景（如重跑 SQL）须同步全量重算，否则存量用户（休眠号等）准入陈旧（注册用户组加 dev 准入后未重算会导致禅道侧被 1004 拒绝、静默落游客态）
 
 **未登录访问（游客）机制与组名中文化的衔接（v4.10.1 补充）**：
 
@@ -809,7 +810,7 @@ rsync -av --exclude 'auth/.env' --exclude '.git/'  本地wenyin-community.github
 
 **保持不变（经评审决定）**：M-1 密码传输协议维持 md5+HTTPS+HMAC（独立攻击面有限且双层哈希后中心库不再存明文 md5）；L-1 登出维持 GET（分站跳转架构决定，低危）。
 
-**部署衔接**：本地两库已完成扩容与升级（随全量覆盖带走）；部署顺序仍为"先源码、后组模型 SQL"；`wenyinos-env/tool/upgrade-password-hash.php` 已纳入物料（若生产另行导入旧数据可重跑，幂等）。
+**部署衔接**：本地两库已完成扩容与升级（中心库随 `deploy/wenyinos_auth.sql` 整库直发）；部署顺序仍为"先源码、后组模型 SQL"；`wenyinos-env/tool/upgrade-password-hash.php` 已纳入物料（若生产另行导入旧数据可重跑，幂等）。
 
 ### 15.17 认证中心反爬虫（v4.10.7，2026-10-08）
 
@@ -844,7 +845,7 @@ rsync -av --exclude 'auth/.env' --exclude '.git/'  本地wenyin-community.github
 
 **实测**：ruojiner SSO 兑换并绑定 `sso_uid` ✓；发布 / 删除 paste ✓；M-2 双设备场景（撤销后首次写操作 401「登录已失效」）✓；受限用户 403「未开通本站访问」✓；游客公开浏览 ✓；测试数据已还原。
 
-**部署**：`make-production.sh`（v4.11 起）生成第四份生产 `.env`（PasteBin）；PasteBin 以宝塔 Node 项目 / PM2 启动，`database.sqlite` 随源码上传（已 gitignore）。**站点 nginx 已由宝塔面板反向代理功能配好**（`vhost/nginx/proxy/paste.wenyinos.com/*.conf`，指向 Node 端口）——无需改动，仅确认反代目标端口与 Node 监听一致。生产实际站点配置汇总见 `wenyinos-env/nginx/bt-panel/bt/`（四站点，含 [WY] 标记的变更点）。
+**部署**：`deploy/env/pastebin.env` 为 PasteBin 生产 `.env`（密钥取自中心库 apps 表）；PasteBin 以宝塔 Node 项目 / PM2 启动，`database.sqlite` 随源码上传（已 gitignore）。**站点 nginx 已由宝塔面板反向代理功能配好**（`vhost/nginx/proxy/paste.wenyinos.com/*.conf`，指向 Node 端口）——无需改动，仅确认反代目标端口与 Node 监听一致。生产实际站点配置汇总见 `wenyinos-env/nginx/bt-panel/bt/`（四站点，含 [WY] 标记的变更点）。
 
 **存量用户对接（已完成）**：`ruojiner` 按名自动绑定；`天知道` 更名为 `tianzhidao`（中文名保留于中心 realname 昵称）、`Sadosasaki` 中心建同名账号——两者中心 uid 已直接写入本地 `sso_uid`，paste 数据完整继承（实测 tianzhidao 可管理其历史片段）。中心侧初始密码已交付管理员分发给本人（建议首次登录后自行修改）。
 
@@ -864,3 +865,18 @@ rsync -av --exclude 'auth/.env' --exclude '.git/'  本地wenyin-community.github
 - **边界**：无 Referer（直接访问中心）无提示；来源站点不在用户可访问范围（受限场景）不显示（"点击进入"仅在可进入时出现）；识别支持多站点（forum/dev/paste 通用）。
 
 **实测**：带 forum / paste Referer 登录 → 登录页与面板提示正确（标题"社区论坛"/"代码粘贴" + 点击进入链接指向对应站点）✓；无 Referer 无提示 ✓；受限用户带 Referer 登录不显示 ✓；面板正常渲染回归 ✓。
+
+### 15.20 上线首日修复记录（v4.12.1 / v4.12.2，2026-10-09）
+
+dump 路线部署上线后暴露并修复的问题（均经本地同版本环境实测 + 生产验收通过）：
+
+1. **账号凭证回填（v4.12.1）**：上线后真实密码登录报错。诊断确认**迁移数据完整**（生产库与交付 SQL 逐行一致），根因是中心库密码与休眠号为**开发联调期统一改写的测试密码哈希**（建库时改写、交付时未回填真实凭证；联调全程使用测试密码掩盖了该问题）。修复交付 `deploy/auth-repair-passwords.sql`：
+   - 禅道用户 5 人（ruojiner / weijie / narukeu / liuweizzuie / wenyinos）→ 主密码回填**真实凭证**（bcrypt 双层，另附论坛休眠号备用通道）；
+   - 纯 BBS 用户 6 人（zccrs / pingtaip / Windelight / lza07 / pingtaisan / MeredithJeames）→ 主密码清空 + **休眠号导入**（首次用原论坛密码登录自动升级为主密码）；
+   - 全量清除登录锁定与失败计数。
+   - **教训**：联调期统一测试密码的改写必须在交付前回填真实值。
+2. **PHP 8.5 兼容（v4.12.2）**：`curl_close()` 在 PHP 8.5 弃用（`wy_http_post` 外呼路径触发页面警告）——移除该调用（8.0 起句柄已自动管理）。
+3. **发信链路致命缺陷修复（v4.12.2）**：`wy_base_url()` 的函数定义行与上一行注释被写在**同一行**，整段定义被注释吞掉——注册自动发验证邮件、找回密码发信路径触发 `Call to undefined function` 致命错误。修复定义行拆分，并补齐发信全链路端到端回归（验证邮件 + 重置邮件经真实 SMTP 事务实际投递、邮件内链接正确生成）。
+   - **教训**：被 SMTP 开关后置的发信路径在联调期必须开启实测一遍，不能只覆盖"开关关闭"分支。
+4. **密码复杂度规则上线（v4.12.2）**：注册 / 重置 / 改密 / 后台建号与重置**全部设密入口**统一校验（`wy_password_policy_error`：8-64 位、须同时含字母和数字、弱密码黑名单、不得与用户名相同），前台输入提示同步（见 15.8 / 15.9 修订）。
+   - 边界：分站 API 密码同步（协议传 md5）无法校验明文复杂度；现有密码不受影响，规则仅约束新设置密码。

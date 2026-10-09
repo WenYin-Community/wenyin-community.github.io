@@ -334,6 +334,24 @@ function wy_password_verify($password_md5, $stored)
 	return password_verify((string)$password_md5, $stored);
 }
 
+// 密码复杂度校验：通过返回 ''，否则返回错误文案（所有设置新密码场景统一调用）
+function wy_password_policy_error($password, $username = '')
+{
+	$len = strlen($password);
+	if($len < 8 || $len > 64) return '密码长度需 8-64 位';
+	if(!preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password)) return '密码需同时包含字母和数字';
+	$lower = strtolower($password);
+	if($username !== '' && strtolower((string)$username) === $lower) return '密码不能与用户名相同';
+	$weak = array(
+		'12345678', '123456789', '1234567890', 'password', 'password1', 'passw0rd', 'p@ssw0rd',
+		'qwerty123', 'qwertyui', 'abc12345', 'abcd1234', '11111111', '00000000', '88888888',
+		'admin123', 'admin888', 'aa123456', 'abc123456', 'a1234567', '12345678a', '123456abc',
+		'qq123456', 'woaini1314', '123123123', 'iloveyou', 'wenyinos', 'wenyinos123', 'test123456', 'test1234',
+	);
+	if(in_array($lower, $weak, TRUE)) return '密码过于简单，请更换';
+	return '';
+}
+
 // 中心当前登录用户（基于 wy_auth cookie 解析；返回 user 行或 false）
 function wy_current_user()
 {
@@ -413,7 +431,8 @@ function wy_guess_referer_site()
 	return NULL;
 }
 
-// ---------------- base_url（邮件链接等绝对地址；WY_BASE_URL 配置优先） ----------------function wy_base_url()
+// ---------------- base_url（邮件链接等绝对地址；WY_BASE_URL 配置优先） ----------------
+function wy_base_url()
 {
 	static $base = NULL;
 	if($base === NULL)
@@ -618,7 +637,6 @@ function wy_http_post($url, $data, $timeout = 5)
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
 		$resp = curl_exec($ch);
 		$errno = curl_errno($ch);
-		curl_close($ch);
 		return ($errno === 0 && $resp !== FALSE) ? $resp : NULL;
 	}
 	$ctx = stream_context_create(array('http' => array(

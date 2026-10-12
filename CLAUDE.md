@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 WenYin Open Source Community (玟茵开源社区) official website - a static site built with Bootstrap 5, featuring bilingual (Chinese/English) support. Deployed via GitHub Pages at https://wenyinos.com.
 
+Additionally hosts the community **unified authentication center** under `auth/` - a lightweight PHP 8 + MySQL service providing site-wide SSO (cross-subdomain ticket cookie + HMAC-signed API), central user/group management and per-site admission control. Design doc: `auth/BBS-禅道SSO集中认证方案.md`.
+
 ## Development
 
 **No build step required.** Open `index.html` directly in a browser to preview.
@@ -24,6 +26,7 @@ convert assets/img/wenyin-logo.png -resize 180x180 assets/img/favicon/apple-touc
 - **404.html** - Custom error page
 - **assets/css/style.css** - Custom styles; CSS variables defined in `:root`
 - **assets/js/main.js** - Language switching, scroll effects, animations
+- **auth/** - Unified authentication center (PHP 8 + MySQL): login/register/profile/admin pages, `api.php` HMAC-signed endpoints (`verify` / `ticket` / `password` / `migrate` / `revoke`), secrets read from `auth/.env` (not in repo)
 
 ## Bilingual System
 

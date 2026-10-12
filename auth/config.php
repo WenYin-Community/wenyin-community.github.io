@@ -67,5 +67,6 @@ return array(
 		'forum' => wy_env('WY_SITE_FORUM', 'http://forum.wenyinos.test:8080/'),
 		'dev'   => wy_env('WY_SITE_DEV', 'http://dev.wenyinos.test:8080/'),
 		'paste' => wy_env('WY_SITE_PASTE', 'http://paste.wenyinos.test:8080/'),
+		'ban'   => wy_env('WY_SITE_BAN', 'http://ban.wenyinos.test:8082/'),
 	),
 );

@@ -54,7 +54,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 			{
 				$error = '账号已锁定，请 ' . ceil($remain / 60) . ' 分钟后再试';
 			}
-			elseif(!wy_password_verify(md5($password), $user['password']) && !wy_try_legacy($user, md5($password)))
+			elseif(!wy_password_verify(md5($password), $user['password']) && !wy_try_legacy($user, md5($password)) && !wy_try_bcrypt($user, $password))
 			{
 				wy_login_fail($user, 'auth');
 				$error = '账号或密码错误';

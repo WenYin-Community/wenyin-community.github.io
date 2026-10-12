@@ -25,6 +25,7 @@ $site_meta = array(
 	'forum' => array('name' => '社区论坛', 'desc' => '交流 · 反馈 · 分享', 'icon' => 'fa-comments'),
 	'dev'   => array('name' => '项目管理', 'desc' => '需求 · 任务 · 缺陷', 'icon' => 'fa-diagram-project'),
 	'paste' => array('name' => '代码粘贴', 'desc' => '分享 · 片段 · 代码', 'icon' => 'fa-file-code'),
+	'ban'   => array('name' => '游戏封禁', 'desc' => '服务器封禁管理', 'icon' => 'fa-gavel'),
 );
 ?>
 <!DOCTYPE html>

@@ -566,6 +566,19 @@ function wy_try_legacy(&$user, $password_md5, $app_id = 'auth')
 	return TRUE;
 }
 
+// ban 站迁移账号兼容：password 列存 bcrypt(明文)（单层，非中心双层格式），
+// 用明文直接校验，成功后升级为中心双层哈希（仅网页登录路径可达，$password_plain = 明文）
+function wy_try_bcrypt(&$user, $password_plain, $app_id = 'auth')
+{
+	if(strpos((string)$user['password'], '$2y$') !== 0) return FALSE;
+	if(!password_verify((string)$password_plain, $user['password'])) return FALSE;
+	$stmt = wy_db()->prepare('UPDATE users SET password = ? WHERE uid = ?');
+	$stmt->execute(array(wy_password_hash(md5($password_plain)), $user['uid']));
+	$user['password'] = md5($password_plain);
+	wy_audit($app_id, $user['uid'], 'bcrypt_upgrade');
+	return TRUE;
+}
+
 // 注册 IP 限速：同 IP 1 小时内注册上限 3 个
 function wy_register_ip_exceeded()
 {
